@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1c2128">
+<title>DIESEL AUTOESCUELA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#1c2128;--bg2:#22272e;--surface:#2d333b;--surface2:#373e47;
+  --border:#444c56;--border2:#545d68;
+  --accent:#316dca;--accent2:#4184e4;--accent3:#79c0ff;
+  --green:#3fb950;--green2:#238636;--red:#f85149;--amber:#d29922;--purple:#bc8cff;
+  --text:#e6edf3;--text2:#8b949e;--text3:#6e7681;
+  --metal1:#30363d;--metal2:#21262d;
+  --mono:'JetBrains Mono',monospace;--sans:'Inter',system-ui,sans-serif;
+  --r:6px;--r2:10px;--shadow:0 8px 32px rgba(0,0,0,.5)
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;font-family:var(--sans);font-size:14px;color:var(--text);background:var(--bg);overflow:hidden}
+.hidden{display:none!important}
+.app{display:flex;flex-direction:column;height:100dvh}
+
+/* LOGIN */
+#login-screen{
+  position:fixed;inset:0;
+  background:linear-gradient(160deg,#0d1117 0%,#161b22 40%,#1c2128 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:200;padding:24px;overflow-y:auto
+}
+.logo-corner{position:absolute;font-size:48px;opacity:.06;pointer-events:none;line-height:1}
+.logo-corner.tl{top:16px;left:16px}
+.logo-corner.tr{top:16px;right:16px}
+.logo-corner.bl{bottom:16px;left:16px}
+.logo-corner.br{bottom:16px;right:16px}
+.login-logo{text-align:center;margin-bottom:28px}
+.brand-mark{width:64px;height:64px;border-radius:var(--r2);background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;box-shadow:0 4px 20px rgba(49,109,202,.4)}
+.login-logo h1{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.login-logo .sub{font-size:10px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+.login-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:24px;width:100%;max-width:360px;box-shadow:var(--shadow)}
+.login-card h2{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:16px}
+.role-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:16px}
+.role-tab{padding:9px 4px;border:1px solid var(--border);background:var(--bg2);border-radius:var(--r);cursor:pointer;text-align:center;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.role-tab .ico{font-size:16px}
+.role-tab .lbl{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.role-tab.active{border-color:var(--accent2);background:rgba(49,109,202,.15)}
+.role-tab.active .lbl{color:var(--accent3)}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px 12px;background:var(--metal2);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--sans);font-size:14px;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--accent2);background:var(--metal1)}
+.fg select option{background:var(--metal2);color:var(--text)}
+.fg textarea{min-height:90px;resize:vertical;line-height:1.6}
+.char-c{font-size:10px;color:var(--text3);text-align:right;margin-top:2px}
+.pin-wrap{display:flex;gap:10px;justify-content:center;margin-top:4px}
+.pin-digit{width:54px!important;height:60px;padding:0!important;font-size:28px!important;font-family:var(--mono)!important;text-align:center;border-radius:var(--r)!important;background:var(--metal2)!important;border:2px solid var(--border)!important;color:var(--accent3)!important;caret-color:transparent;-webkit-text-security:disc}
+.pin-digit:focus{border-color:var(--accent2)!important;background:var(--metal1)!important}
+.login-error{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:#ffa198;font-size:12px;padding:8px 12px;border-radius:var(--r);margin-bottom:10px;display:none;font-weight:500}
+.btn-primary{width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:700;cursor:pointer;transition:background .15s}
+.btn-primary:active{background:#1f5ab0}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+
+/* HEADER */
+.header{background:var(--metal2);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;height:48px}
+.hdr-brand{display:flex;align-items:center;gap:10px}
+.hdr-brand h1{font-size:13px;font-weight:700;color:var(--text)}
+.hdr-brand p{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:1px}
+.hdr-right{display:flex;align-items:center;gap:8px}
+#sync-dot{width:7px;height:7px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .3s}
+#sync-dot.online{background:var(--green)}
+#sync-dot.syncing{background:var(--amber);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.btn-salir{background:var(--surface);border:1px solid var(--border);color:var(--text2);font-size:10px;padding:5px 10px;border-radius:var(--r);cursor:pointer;font-family:var(--sans);text-transform:uppercase;letter-spacing:.4px}
+
+/* TABS */
+.tabs{background:var(--metal2);border-bottom:1px solid var(--border);display:flex;flex-shrink:0}
+.tab{flex:1;padding:8px 2px 7px;border:none;background:transparent;font-size:9px;font-weight:700;color:var(--text3);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;border-bottom:2px solid transparent;font-family:var(--sans);text-transform:uppercase;letter-spacing:.4px;transition:color .15s}
+.tab.active{color:var(--accent3);border-bottom-color:var(--accent2)}
+.tab-ico{font-size:15px}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:10px}
+
+/* DATE NAV */
+.date-nav{display:flex;align-items:center;gap:8px;margin-bottom:10px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:7px 10px}
+.dnav-btn{width:30px;height:30px;background:var(--metal2);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:15px;color:var(--accent3);flex-shrink:0;font-weight:700}
+.dnav-label{flex:1;text-align:center;font-weight:700;font-size:13px;color:var(--text)}
+.btn-sm{padding:5px 10px;border:none;border-radius:var(--r);cursor:pointer;font-size:11px;font-weight:700;font-family:var(--sans);text-transform:uppercase;letter-spacing:.3px}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-dark{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-green{background:var(--green2);color:#fff}
+
+/* CALENDARIO */
+.citas-wrap{display:flex;height:100%;min-height:0}
+.prof-sb{width:86px;min-width:86px;background:var(--metal2);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:5px 3px;gap:2px}
+.sb-btn{display:block;width:100%;padding:5px 3px;background:transparent;border:none;border-radius:var(--r);color:var(--text3);font-size:9px;font-weight:600;cursor:pointer;text-align:center;transition:all .15s;font-family:var(--sans);word-break:break-word;line-height:1.3}
+.sb-btn:hover{background:var(--surface);color:var(--text2)}
+.sb-btn.active{background:rgba(49,109,202,.2);color:var(--accent3);border:1px solid rgba(49,109,202,.35)}
+.cal-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.cal-legend{display:flex;flex-wrap:wrap;gap:4px;padding:7px 10px;border-bottom:1px solid var(--border);background:var(--metal2)}
+.cal-hour-row{display:flex;align-items:flex-start;border-bottom:1px solid var(--metal1);padding:5px 0}
+.cal-hour-row:last-child{border-bottom:none}
+.cal-hora{width:36px;min-width:36px;font-size:10px;font-weight:700;color:var(--accent3);padding:5px 4px 0 7px;flex-shrink:0;font-family:var(--mono)}
+.cal-hour-slots{display:flex;flex-wrap:wrap;gap:5px;padding:2px 7px 3px 0;flex:1;align-items:flex-start}
+.cal-chip{display:inline-flex;flex-direction:column;padding:5px 9px;border-radius:var(--r);border:1px solid transparent;min-width:76px;max-width:130px;cursor:default;transition:opacity .15s}
+.cal-chip:hover{opacity:.82}
+.chip-x{opacity:.45;cursor:pointer;padding:2px 4px;font-size:9px;margin-left:3px;border-radius:3px;background:none;border:none;color:inherit;line-height:1}
+.chip-x:hover{opacity:1;background:rgba(0,0,0,.25)}
+.btn-add-slot{width:26px;height:26px;border-radius:var(--r);border:1px dashed var(--border2);background:transparent;cursor:pointer;font-size:17px;color:var(--accent3);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* PRÁCTICAS */
+.prac-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:var(--r);padding:11px 13px;display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:9px;margin-bottom:7px}
+.prac-card.firmada{border-left-color:var(--green)}
+.prac-hora{font-size:16px;font-weight:800;color:var(--accent3);font-family:var(--mono)}
+.prac-nom{font-weight:700;font-size:13px;color:var(--text)}
+.prac-sub{font-size:10px;color:var(--text2);margin-top:2px;display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.vbadge{padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase}
+.vbadge.coche{background:rgba(49,109,202,.2);color:var(--accent3)}
+.vbadge.moto{background:rgba(210,153,34,.15);color:#e3b341}
+.vbadge.camion{background:rgba(63,185,80,.15);color:var(--green)}
+.btn-firmar{padding:7px 11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:11px;font-weight:700;white-space:nowrap;font-family:var(--sans)}
+.firma-ok{width:26px;height:26px;background:rgba(63,185,80,.15);border:1px solid rgba(63,185,80,.3);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+
+/* ALUMNOS */
+.arow{display:flex;align-items:center;gap:9px;padding:9px 13px;border-bottom:1px solid var(--border)}
+.arow:nth-child(even){background:rgba(255,255,255,.02)}
+.arow:last-child{border-bottom:none}
+.avatar{width:34px;height:34px;border-radius:var(--r);background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;cursor:pointer}
+.arow-info{flex:1;min-width:0;cursor:pointer}
+.arow-nom{font-weight:600;font-size:13px;color:var(--text)}
+.arow-sub{font-size:10px;color:var(--text2);margin-top:1px}
+.carnet-tag{padding:1px 5px;background:var(--accent);color:#fff;border-radius:3px;font-size:9px;font-weight:700;text-transform:uppercase}
+.icon-btn{width:28px;height:28px;border:none;border-radius:var(--r);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.edit-btn{background:rgba(49,109,202,.15);color:var(--accent3)}
+.del-btn{background:rgba(248,81,73,.12);color:#f85149}
+.search-inp{width:100%;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);font-size:13px;font-family:var(--sans);color:var(--text);margin-bottom:9px}
+.search-inp:focus{outline:none;border-color:var(--accent2)}
+.sort-bar{display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap;align-items:center}
+.sort-btn{padding:4px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface);font-size:10px;font-weight:700;color:var(--text2);cursor:pointer;font-family:var(--sans);text-transform:uppercase}
+.sort-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* PROFESOR DROPDOWN */
+.prof-dropdown-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;margin-bottom:9px}
+.prof-dropdown-wrap label{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:4px}
+#prof-select{width:100%;padding:8px 12px;border:1px solid var(--accent2);border-radius:var(--r);font-size:13px;font-weight:700;color:var(--accent3);background:rgba(49,109,202,.1);font-family:var(--sans)}
+.prof-mgmt{background:var(--metal2);border:1px solid var(--border);border-radius:var(--r);padding:8px 12px;margin-bottom:9px;display:flex;align-items:center;justify-content:space-between}
+.prof-mgmt span{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px}
+
+/* SHEETS */
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;display:flex;flex-direction:column;justify-content:flex-end}
+.sheet{background:var(--bg2);border-radius:var(--r2) var(--r2) 0 0;max-height:92vh;overflow-y:auto;border:1px solid var(--border)}
+.sheet-handle{width:30px;height:3px;background:var(--border2);border-radius:2px;margin:9px auto 2px}
+.sheet-head{padding:7px 16px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1}
+.sheet-head h2{font-size:13px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.4px}
+.sheet-head p{font-size:10px;color:var(--text2);margin-top:2px}
+.btn-close{width:26px;height:26px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center}
+.sheet-body{padding:13px 16px}
+.sheet-btns{display:flex;gap:9px;padding:3px 16px 18px}
+.btn-prim{flex:1;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);text-transform:uppercase;letter-spacing:.4px}
+.btn-prim:active{background:#1f5ab0}
+.btn-sec{flex:1;padding:11px;border:1px solid var(--border);background:var(--surface);border-radius:var(--r);font-size:13px;cursor:pointer;color:var(--text);font-family:var(--sans)}
+.dur-opts{display:flex;gap:9px;margin-top:4px}
+.dur-opt{flex:1;padding:9px;border:2px solid var(--border);background:var(--metal2);border-radius:var(--r);cursor:pointer;text-align:center;font-size:13px;font-weight:700;color:var(--text2);transition:all .15s}
+.dur-opt.sel{border-color:var(--accent2);background:rgba(49,109,202,.15);color:var(--accent3)}
+
+/* FICHA / HISTORIAL */
+.ficha-sec{margin-bottom:12px}
+.ficha-sec-title{font-size:9px;font-weight:700;color:var(--accent3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:7px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.ficha-row{display:flex;gap:9px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.ficha-row:last-child{border-bottom:none}
+.ficha-lbl{font-size:10px;color:var(--text3);min-width:66px;font-weight:700;text-transform:uppercase;padding-top:1px}
+.ficha-val{font-size:13px;font-weight:500;flex:1;color:var(--text);word-break:break-word}
+.ficha-notas{background:var(--metal2);border:1px solid var(--border);border-radius:var(--r);padding:9px;font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap;min-height:44px}
+.ficha-notas.vacio{color:var(--text3);font-style:italic}
+.hist-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.stat-box{background:var(--metal2);border:1px solid var(--border);border-radius:var(--r);padding:11px;text-align:center}
+.stat-num{font-size:21px;font-weight:800;color:var(--accent3)}
+.stat-lbl{font-size:9px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:.5px}
+.hist-row{display:flex;align-items:center;gap:5px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.hist-row:last-child{border-bottom:none}
+.firma-tag{padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;text-transform:uppercase}
+.firma-tag.ok{background:rgba(63,185,80,.15);color:var(--green);border:1px solid rgba(63,185,80,.2)}
+.firma-tag.no{background:var(--surface);color:var(--text3);border:1px solid var(--border)}
+.prof-tag{padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;background:rgba(49,109,202,.15);color:var(--accent3);flex-shrink:0;text-transform:uppercase}
+.firma-thumb{height:30px;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;max-width:76px;object-fit:contain}
+
+/* FIRMA CANVAS */
+.canvas-wrap{border:2px solid var(--accent2);border-radius:var(--r);overflow:hidden;background:#fff;margin-bottom:7px}
+#firma-canvas{display:block;width:100%;height:155px;touch-action:none;cursor:crosshair}
+.firma-hint{text-align:center;font-size:11px;color:var(--text3);padding:5px;font-style:italic}
+
+/* DASHBOARD */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.kpi-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.kpi-val{font-size:22px;font-weight:800;color:var(--accent3);font-family:var(--mono)}
+.kpi-lbl{font-size:9px;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:.5px}
+.kpi-box.green .kpi-val{color:var(--green)}
+.kpi-box.purple .kpi-val{color:var(--purple)}
+
+/* CONFIG */
+.cfg-sec{margin-bottom:16px}
+.cfg-sec h3{font-size:10px;font-weight:700;color:var(--accent3);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;padding:5px 0;border-bottom:1px solid var(--border)}
+.sec-notice{background:rgba(63,185,80,.07);border:1px solid rgba(63,185,80,.2);border-radius:var(--r);padding:9px 12px;font-size:11px;color:var(--green);margin-bottom:10px}
+
+/* WA */
+.wa-opt{border:1px solid var(--border);background:var(--metal2);border-radius:var(--r);padding:9px 11px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.wa-opt.sel{border-color:var(--accent2);background:rgba(49,109,202,.1)}
+.wa-opt-title{font-size:11px;font-weight:700;margin-bottom:3px;color:var(--text);text-transform:uppercase}
+.wa-opt-prev{font-size:11px;color:var(--text2);line-height:1.5}
+.btn-wa{width:100%;padding:12px;background:var(--green2);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;margin-top:9px;font-family:var(--sans)}
+
+/* CONFIRM */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.confirm-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:22px;width:100%;max-width:310px;text-align:center;border-top:3px solid var(--accent2)}
+.confirm-ico{font-size:30px;margin-bottom:9px}
+.confirm-title{font-size:14px;font-weight:700;margin-bottom:5px;color:var(--text)}
+.confirm-msg{font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.5;white-space:pre-line}
+.confirm-acts{display:flex;gap:9px}
+.btn-conf-ok{flex:1;padding:10px;background:var(--red);color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-size:13px;font-weight:700;font-family:var(--sans)}
+.btn-conf-no{flex:1;padding:10px;border:1px solid var(--border);background:var(--surface2);border-radius:var(--r);cursor:pointer;font-size:13px;font-family:var(--sans);color:var(--text)}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--surface2);color:var(--text);padding:9px 18px;border-radius:var(--r);font-size:12px;font-weight:600;z-index:500;white-space:nowrap;animation:toastIn .2s ease;max-width:90vw;text-align:center;border:1px solid var(--border2);border-left:3px solid var(--accent2);box-shadow:var(--shadow)}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+.empty{text-align:center;padding:36px 20px}
+.empty .eico{font-size:32px;margin-bottom:9px;opacity:.28}
+.empty p{font-size:12px;color:var(--text3);font-weight:500}
+.loading{display:flex;align-items:center;justify-content:center;padding:32px;color:var(--text3);font-size:12px;gap:7px}
+.spinner{width:17px;height:17px;border:2px solid var(--border);border-top-color:var(--accent2);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.app-logo{position:fixed;font-size:16px;opacity:.05;pointer-events:none;z-index:0}
+.app-logo.tl{top:54px;left:8px}
+.app-logo.tr{top:54px;right:8px}
+.app-logo.bl{bottom:8px;left:8px}
+.app-logo.br{bottom:8px;right:8px}
+</style>
+</head>
+<body>
+
+<!-- Logos esquinas login -->
+<div class="logo-corner tl">🚗</div>
+<div class="logo-corner tr">🚗</div>
+<div class="logo-corner bl">🚗</div>
+<div class="logo-corner br">🚗</div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-logo">
+    <div class="brand-mark">🚗</div>
+    <h1>DIESEL AUTOESCUELA</h1>
+    <p>Sistema de gestión · v8.1</p>
+  </div>
+  <div class="login-card">
+    <h2>Acceder al sistema</h2>
+    <div class="role-tabs">
+      <div class="role-tab active" id="role-admin" onclick="selRole('admin')"><span class="ico">🗂️</span><span class="lbl">Admin</span></div>
+      <div class="role-tab" id="role-jefe" onclick="selRole('jefe')"><span class="ico">👔</span><span class="lbl">Jefe</span></div>
+      <div class="role-tab" id="role-prof" onclick="selRole('prof')"><span class="ico">👨‍🏫</span><span class="lbl">Profesor</span></div>
+    </div>
+    <div class="fg" id="wrap-nombre">
+      <label>Tu nombre</label>
+      <input type="text" id="login-nombre" placeholder="Nombre de acceso" autocomplete="name" maxlength="60">
+    </div>
+    <div class="fg hidden" id="wrap-prof-sel">
+      <label>Selecciona tu nombre</label>
+      <select id="login-prof-sel"><option value="">— Cargando... —</option></select>
+    </div>
+    <div class="fg">
+      <label>PIN — 4 dígitos</label>
+      <div class="pin-wrap">
+        <input class="pin-digit" type="tel" maxlength="1" id="pin0" inputmode="numeric" pattern="[0-9]">
+        <input class="pin-digit" type="tel" maxlength="1" id="pin1" inputmode="numeric" pattern="[0-9]">
+        <input class="pin-digit" type="tel" maxlength="1" id="pin2" inputmode="numeric" pattern="[0-9]">
+        <input class="pin-digit" type="tel" maxlength="1" id="pin3" inputmode="numeric" pattern="[0-9]">
+      </div>
+    </div>
+    <div class="login-error" id="login-error">Nombre o PIN incorrectos</div>
+    <button class="btn-primary" id="login-btn">Entrar</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app hidden" id="main-app">
+  <div class="app-logo tl">🚗</div><div class="app-logo tr">🚗</div>
+  <div class="app-logo bl">🚗</div><div class="app-logo br">🚗</div>
+  <div class="header">
+    <div class="hdr-brand">
+      <span style="font-size:20px">🚗</span>
+      <div><h1>DIESEL AUTOESCUELA</h1><p id="rol-label">Sistema</p></div>
+    </div>
+    <div class="hdr-right">
+      <div id="sync-dot"></div>
+      <button class="btn-salir" id="btn-salir">Salir</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="admin"><span class="tab-ico">📅</span>Calendario</button>
+    <button class="tab" data-tab="profesor"><span class="tab-ico">👨‍🏫</span>Profesor</button>
+    <button class="tab" data-tab="alumnos"><span class="tab-ico">👥</span>Alumnos</button>
+    <button class="tab" data-tab="dashboard" id="tab-btn-dash"><span class="tab-ico">📊</span>Dashboard</button>
+    <button class="tab" data-tab="config"><span class="tab-ico">⚙️</span>Config</button>
+  </div>
+  <div class="content">
+
+    <!-- CALENDARIO -->
+    <div id="tab-admin">
+      <div class="citas-wrap">
+        <div class="prof-sb" id="prof-sb">
+          <button class="sb-btn active" onclick="selSb(this,'')">👥<br>TODOS</button>
+          <div id="sb-list"></div>
+        </div>
+        <div class="cal-panel">
+          <div class="date-nav">
+            <button class="dnav-btn" id="btn-dia-prev">‹</button>
+            <span class="dnav-label" id="fecha-label"></span>
+            <button class="dnav-btn" id="btn-dia-next">›</button>
+            <button class="btn-sm btn-dark" id="btn-hoy">Hoy</button>
+            <button class="btn-sm" style="background:rgba(248,81,73,.15);color:#f85149;border:1px solid rgba(248,81,73,.3)" onclick="abrirPendientesFirma()">✍️ Pendientes</button>
+            <button class="btn-sm btn-accent" id="btn-nueva-cita">+ Nueva</button>
+          </div>
+          <div class="card" id="card-cal">
+            <div id="cal-legend" class="cal-legend" style="display:none"></div>
+            <div id="cal-body"><div class="loading"><div class="spinner"></div>Cargando...</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFESOR -->
+    <div id="tab-profesor" class="hidden">
+      <div class="prof-mgmt hidden" id="prof-mgmt">
+        <span>Profesores</span>
+        <button class="btn-sm btn-accent" id="btn-nuevo-prof">+ Añadir</button>
+      </div>
+      <div id="prof-admin-nav" style="display:none">
+        <div class="prof-dropdown-wrap">
+          <label>Profesor activo</label>
+          <select id="prof-select"><option value="">— Selecciona un profesor —</option></select>
+        </div>
+        <div class="date-nav">
+          <button class="dnav-btn" id="btn-prof-prev">‹</button>
+          <span class="dnav-label" id="fecha-prof-label"></span>
+          <button class="dnav-btn" id="btn-prof-next">›</button>
+        </div>
+      </div>
+      <div id="prof-self-nav" style="display:none">
+        <div class="date-nav">
+          <button class="dnav-btn" id="btn-prof-prev2">‹</button>
+          <span class="dnav-label" id="fecha-prof-label2"></span>
+          <button class="dnav-btn" id="btn-prof-next2">›</button>
+        </div>
+      </div>
+      <div style="padding:4px 0 9px">
+        <button onclick="abrirPendientesFirma()" style="width:100%;padding:9px 13px;background:rgba(248,81,73,.1);color:#f85149;border:1px solid rgba(248,81,73,.25);border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)">✍️ Pendientes de firma</button>
+      </div>
+      <div id="prac-list"></div>
+      <div id="prof-list-wrap" class="hidden" style="margin-top:12px">
+        <div class="cfg-sec"><h3>Profesores registrados</h3></div>
+        <div class="card" id="prof-body"></div>
+      </div>
+    </div>
+
+    <!-- ALUMNOS -->
+    <div id="tab-alumnos" class="hidden">
+      <input class="search-inp" type="search" id="search-al" placeholder="Buscar nombre o teléfono...">
+      <div class="sort-bar">
+        <button class="sort-btn active" data-sort="alpha">A–Z</button>
+        <button class="sort-btn" data-sort="ant">Antigüedad</button>
+        <button class="sort-btn hidden" id="btn-nuevo-al" style="margin-left:auto;background:var(--accent);color:#fff;border:none">+ Nuevo</button>
+      </div>
+      <div class="card" id="al-body"><div class="loading"><div class="spinner"></div>Cargando...</div></div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="tab-dashboard" class="hidden">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">📊 Mes actual</span>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn-sm btn-dark" onclick="renderDashboard()">🔄 Actualizar</button>
+          <button class="btn-sm" style="background:rgba(248,81,73,.15);color:#f85149;border:1px solid rgba(248,81,73,.3)" onclick="abrirPendientesFirma()">✍️ Pendientes</button>
+          <button class="btn-sm btn-green" id="btn-backup-json">💾 Backup</button>
+        </div>
+      </div>
+      <div class="kpi-grid" id="dash-kpis"><div class="kpi-box" style="grid-column:span 2"><div class="kpi-val" style="font-size:14px">Pulsa Actualizar</div></div></div>
+      <div id="dash-tabla"></div>
+    </div>
+
+    <!-- CONFIG -->
+    <div id="tab-config" class="hidden">
+      <div id="cfg-admin" class="hidden">
+        <div class="sec-notice">🔒 Credenciales en Firestore · Auth anónima activa</div>
+        <div class="cfg-sec">
+          <h3>🔑 Credenciales de acceso</h3>
+          <div class="card" style="padding:13px">
+            <p style="font-size:10px;font-weight:700;color:var(--accent3);text-transform:uppercase;margin-bottom:8px">🗂️ Administrador</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px">
+              <div class="fg" style="margin:0"><label>Nombre</label><input type="text" id="cfg-admin-nombre" placeholder="Admin" maxlength="40"></div>
+              <div class="fg" style="margin:0"><label>PIN</label><input type="tel" id="new-pin-admin" maxlength="4" inputmode="numeric" placeholder="····" style="font-size:20px;letter-spacing:8px;text-align:center;font-family:var(--mono)"></div>
+            </div>
+            <button class="btn-prim" style="width:100%;margin-bottom:13px" id="btn-pin-admin">Guardar Admin</button>
+            <p style="font-size:10px;font-weight:700;color:var(--accent3);text-transform:uppercase;margin-bottom:8px">👔 Jefe</p>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:9px">
+              <div class="fg" style="margin:0"><label>Nombre</label><input type="text" id="cfg-jefe-nombre" placeholder="Jefe" maxlength="40"></div>
+              <div class="fg" style="margin:0"><label>PIN</label><input type="tel" id="new-pin-jefe" maxlength="4" inputmode="numeric" placeholder="····" style="font-size:20px;letter-spacing:8px;text-align:center;font-family:var(--mono)"></div>
+            </div>
+            <button class="btn-prim" style="width:100%;background:var(--green2)" id="btn-pin-jefe">Guardar Jefe</button>
+          </div>
+        </div>
+        <div class="cfg-sec">
+          <h3>💶 Precio por clase (45 min)</h3>
+          <div class="card" style="padding:13px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:10px">
+              <div><label style="font-size:9px;font-weight:700;display:block;margin-bottom:3px;text-transform:uppercase;color:var(--text2)">🚗 Coche €</label><input type="number" id="precio-coche" min="1" max="999" placeholder="20" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:var(--r);font-size:17px;font-weight:700;text-align:center;font-family:var(--mono);background:var(--metal2);color:var(--accent3)"></div>
+              <div><label style="font-size:9px;font-weight:700;display:block;margin-bottom:3px;text-transform:uppercase;color:var(--text2)">🏍️ Moto €</label><input type="number" id="precio-moto" min="1" max="999" placeholder="25" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:var(--r);font-size:17px;font-weight:700;text-align:center;font-family:var(--mono);background:var(--metal2);color:var(--accent3)"></div>
+              <div><label style="font-size:9px;font-weight:700;display:block;margin-bottom:3px;text-transform:uppercase;color:var(--text2)">🚛 Camión €</label><input type="number" id="precio-camion" min="1" max="999" placeholder="35" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:var(--r);font-size:17px;font-weight:700;text-align:center;font-family:var(--mono);background:var(--metal2);color:var(--accent3)"></div>
+            </div>
+            <button class="btn-prim" style="width:100%" id="btn-precios-guardar">Guardar precios</button>
+          </div>
+        </div>
+        <div class="cfg-sec">
+          <h3>📱 WhatsApp</h3>
+          <div class="card" style="padding:13px">
+            <div class="fg"><label>API Key (360dialog)</label><input type="text" id="wa-key" placeholder="Tu API Key"></div>
+            <div class="fg"><label>Número Business</label><input type="text" id="wa-phone" placeholder="+34600000000"></div>
+            <button class="btn-prim" style="width:100%" id="btn-wa-guardar">Guardar</button>
+          </div>
+        </div>
+      </div>
+      <div id="cfg-jefe" class="hidden">
+        <div class="sec-notice">👔 Vista Jefe</div>
+        <button class="btn-prim" style="width:100%;margin-bottom:8px" onclick="irTab('dashboard')">📊 Ver Dashboard</button>
+      </div>
+      <div class="card" style="padding:13px;margin-top:6px">
+        <p style="font-size:12px;color:var(--text2)">Perfil: <strong id="cfg-rol" style="color:var(--accent3)"></strong></p>
+        <p id="user-name-display" style="font-size:10px;color:var(--text3);margin-top:3px"></p>
+        <p style="font-size:9px;color:var(--text3);margin-top:5px">DIESEL AUTOESCUELA · v8.1 · diesel-horario</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- SHEETS -->
+<div class="sheet-overlay hidden" id="sh-practica">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Nueva práctica</h2><button class="btn-close" data-close="sh-practica">✕</button></div>
+    <div class="sheet-body">
+      <div class="fg"><label>Hora de inicio</label><input type="time" id="m-hora" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:var(--r);font-size:15px;font-family:var(--mono);background:var(--metal2);color:var(--accent3)"></div>
+      <div class="fg">
+        <label>Duración</label>
+        <div class="dur-opts">
+          <div class="dur-opt sel" data-dur="45">45 min</div>
+          <div class="dur-opt" data-dur="30">30 min</div>
+        </div>
+        <input type="hidden" id="m-duracion" value="45">
+      </div>
+      <div class="fg"><label>Alumno</label><select id="m-alumno"></select></div>
+      <div class="fg"><label>Profesor</label><select id="m-prof"></select></div>
+      <div class="fg"><label>Vehículo</label>
+        <select id="m-vehiculo">
+          <option value="coche">🚗 Coche</option>
+          <option value="moto">🏍️ Moto</option>
+          <option value="camion">🚛 Camión</option>
+        </select>
+      </div>
+    </div>
+    <div class="sheet-btns">
+      <button class="btn-sec" data-close="sh-practica">Cancelar</button>
+      <button class="btn-prim" id="btn-guardar-prac">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="sh-firma">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Firma del alumno</h2><button class="btn-close" data-close="sh-firma">✕</button></div>
+    <div class="sheet-body">
+      <p id="firma-sub" style="font-size:13px;color:var(--text2);margin-bottom:9px;font-weight:600"></p>
+      <div class="canvas-wrap"><canvas id="firma-canvas" width="1000" height="320"></canvas></div>
+      <div class="firma-hint">✍️ Firma con el dedo o el ratón</div>
+    </div>
+    <div class="sheet-btns">
+      <button class="btn-sec" id="btn-limpiar">Limpiar</button>
+      <button class="btn-prim" id="btn-confirmar-firma">Confirmar firma</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="sh-alumno">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2 id="sh-al-titulo">Nuevo alumno</h2><button class="btn-close" data-close="sh-alumno">✕</button></div>
+    <div class="sheet-body">
+      <div class="fg"><label>Nombre completo</label><input type="text" id="al-nombre" placeholder="Juan García López" autocomplete="name"></div>
+      <div class="fg"><label>Teléfono</label><input type="tel" id="al-tel" placeholder="+34 612 345 678"></div>
+      <div class="fg"><label>Tipo de carnet</label>
+        <select id="al-carnet">
+          <option value="B">B — Coche</option>
+          <option value="A">A — Moto</option>
+          <option value="C">C — Camión</option>
+          <option value="A+B">A + B</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Notas</label>
+        <textarea id="al-notas" maxlength="6000" placeholder="Observaciones..."></textarea>
+        <div class="char-c"><span id="al-notas-c">0</span>/6000</div>
+      </div>
+    </div>
+    <div class="sheet-btns">
+      <button class="btn-sec" data-close="sh-alumno">Cancelar</button>
+      <button class="btn-prim" id="btn-guardar-alumno">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="sh-ficha">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><div><h2 id="ficha-nom"></h2><p id="ficha-sub2"></p></div><button class="btn-close" data-close="sh-ficha">✕</button></div>
+    <div class="sheet-body">
+      <div class="ficha-sec">
+        <div class="ficha-sec-title">Datos</div>
+        <div class="ficha-row"><span class="ficha-lbl">Nombre</span><span class="ficha-val" id="f-nom"></span></div>
+        <div class="ficha-row"><span class="ficha-lbl">Teléfono</span><span class="ficha-val" id="f-tel"></span></div>
+        <div class="ficha-row"><span class="ficha-lbl">Carnet</span><span class="ficha-val" id="f-carnet"></span></div>
+        <div class="ficha-row"><span class="ficha-lbl">Alta</span><span class="ficha-val" id="f-alta"></span></div>
+      </div>
+      <div class="ficha-sec"><div class="ficha-sec-title">Notas</div><div class="ficha-notas" id="f-notas"></div></div>
+      <div style="display:flex;gap:7px;margin-top:9px">
+        <button class="btn-sec" style="flex:1" id="btn-editar-ficha">✏️ Editar</button>
+        <button class="btn-prim" style="flex:1" id="btn-historial-ficha">📋 Historial</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="sh-hist">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><div><h2 id="hist-nom"></h2><p id="hist-sub"></p></div><button class="btn-close" data-close="sh-hist">✕</button></div>
+    <div class="sheet-body">
+      <div class="hist-stats" id="hist-stats"></div>
+      <div id="hist-rows"></div>
+      <div style="display:flex;gap:7px;margin-top:12px" id="hist-export-btns">
+        <button class="btn-prim" style="flex:1" id="btn-csv">📊 Exportar CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="sh-ver-firma">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2 id="vf-nom">Firma</h2><button class="btn-close" data-close="sh-ver-firma">✕</button></div>
+    <div class="sheet-body">
+      <img id="vf-img" src="" style="width:100%;border-radius:var(--r);border:1px solid var(--border);background:#fff" alt="Firma">
+      <button class="btn-prim" style="width:100%;margin-top:10px" id="btn-descargar-firma">Guardar imagen</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="sh-prof">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2 id="sh-prof-titulo">Nuevo profesor</h2><button class="btn-close" data-close="sh-prof">✕</button></div>
+    <div class="sheet-body">
+      <div class="fg"><label>Nombre completo</label><input type="text" id="pr-nom" placeholder="Pedro Gómez"></div>
+      <div class="fg"><label>Teléfono (opcional)</label><input type="tel" id="pr-tel"></div>
+      <div class="fg"><label>PIN acceso (4 dígitos)</label><input type="tel" id="pr-pin" maxlength="4" inputmode="numeric" placeholder="1234" style="font-size:20px;letter-spacing:8px;text-align:center;font-family:var(--mono)"></div>
+      <div class="fg"><label>Especialidad</label>
+        <select id="pr-esp">
+          <option value="coche">🚗 Coche</option>
+          <option value="moto">🏍️ Moto</option>
+          <option value="camion">🚛 Camión</option>
+          <option value="todos">Todos</option>
+        </select>
+      </div>
+    </div>
+    <div class="sheet-btns">
+      <button class="btn-sec" data-close="sh-prof">Cancelar</button>
+      <button class="btn-prim" id="btn-guardar-prof">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="sh-wa">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>WhatsApp</h2><button class="btn-close" data-close="sh-wa">✕</button></div>
+    <div class="sheet-body">
+      <p id="wa-info" style="font-size:13px;font-weight:700;color:var(--accent3);margin-bottom:10px"></p>
+      <div id="wa-tipo1" class="wa-opt sel"><div class="wa-opt-title">📅 Nueva cita</div><div class="wa-opt-prev" id="wa-prev1"></div></div>
+      <div id="wa-tipo2" class="wa-opt"><div class="wa-opt-title">🔄 Hora modificada</div><div class="wa-opt-prev" id="wa-prev2"></div></div>
+      <button class="btn-wa" id="btn-enviar-wa">📱 Enviar por WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet-overlay hidden" id="sh-pendientes">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>✍️ Pendientes de firma</h2><button class="btn-close" data-close="sh-pendientes">✕</button></div>
+    <div style="padding:7px 13px;border-bottom:1px solid var(--border)">
+      <button onclick="cargarPendientesFirma()" style="width:100%;padding:7px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--sans)">🔄 Actualizar</button>
+    </div>
+    <div id="pend-body" style="padding:13px;overflow-y:auto;max-height:68vh"><p style="text-align:center;color:var(--text3);padding:28px;font-size:12px">Pulsa Actualizar</p></div>
+  </div>
+</div>
+
+<div class="confirm-overlay hidden" id="sh-confirm">
+  <div class="confirm-box">
+    <div class="confirm-ico" id="cfm-ico">🗑️</div>
+    <div class="confirm-title" id="cfm-title"></div>
+    <div class="confirm-msg" id="cfm-msg"></div>
+    <div class="confirm-acts">
+      <button class="btn-conf-no" id="btn-cfm-no">Cancelar</button>
+      <button class="btn-conf-ok" id="btn-cfm-ok">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDKs + lógica arrancan cuando el DOM está listo -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+
+<script>
+// Los SDKs son síncronos — ya están definidos aquí.
+// DOMContentLoaded garantiza que todos los elementos HTML existen.
+document.addEventListener('DOMContentLoaded', function(){
+
+// ── FIREBASE — proyecto diesel-horario ──
+var _app = firebase.apps.length ? firebase.apps[0] : firebase.initializeApp({
+  apiKey:            "AIzaSyATZQ8p-0jxIC3QNOVWhWE5jXSyfrKlutg",
+  authDomain:        "diesel-horario.firebaseapp.com",
+  projectId:         "diesel-horario",
+  storageBucket:     "diesel-horario.firebasestorage.app",
+  messagingSenderId: "622537920557",
+  appId:             "1:622537920557:web:949dfc43c0112b9cb4a8a4"
+});
+var db   = firebase.firestore();
+var auth = firebase.auth();
+
+// Auth anónima — necesaria para que las Firestore Rules permitan acceso
+auth.signInAnonymously().catch(function(e){ console.warn('Auth anónima:', e.code); });
+
+// waitAuth — espera auth con timeout de 5s para no congelarse
+function waitAuth(){
+  return new Promise(function(res){
+    var done=false;
+    var u=auth.onAuthStateChanged(function(user){
+      if(done)return; done=true; u(); res(user);
+    });
+    // Timeout: si en 5s no hay auth, continuar igualmente
+    setTimeout(function(){ if(!done){ done=true; res(null); } },5000);
+  });
+}
+
+// ── CONSTANTES ──
+var PRECIO_KEY='dh_precios', WA_KEY='dh_wa', SORT_KEY='dh_sort', CRED_DOC='config_credenciales';
+var DIAS=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+var MESC=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+var MESL=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+var PROF_PAL=[
+  {bg:'rgba(49,109,202,.15)',tx:'#79c0ff',bd:'rgba(49,109,202,.4)'},
+  {bg:'rgba(63,185,80,.15)',tx:'#56d364',bd:'rgba(63,185,80,.4)'},
+  {bg:'rgba(188,140,255,.15)',tx:'#bc8cff',bd:'rgba(188,140,255,.4)'},
+  {bg:'rgba(210,153,34,.15)',tx:'#e3b341',bd:'rgba(210,153,34,.4)'},
+  {bg:'rgba(248,81,73,.15)',tx:'#ff7b72',bd:'rgba(248,81,73,.4)'},
+  {bg:'rgba(6,182,212,.15)',tx:'#22d3ee',bd:'rgba(6,182,212,.4)'},
+  {bg:'rgba(236,72,153,.15)',tx:'#f472b6',bd:'rgba(236,72,153,.4)'},
+  {bg:'rgba(234,179,8,.15)',tx:'#facc15',bd:'rgba(234,179,8,.4)'}
+];
+
+// ── ESTADO ──
+var rol='', profColors={};
+var currentDate=new Date(), profDate=new Date();
+var alumnos=[], profesores=[];
+var profSel='', _sbProfId='';
+var editAlId=null, fichaAlId=null, editProfId=null;
+var firmaTgt=null, waPrac=null, waTipo=1;
+var histTodas=[], vfData=null, cfmCb=null;
+var canvas, ctx, dibujando=false;
+var unsubCal=null, unsubProf=null;
+var sortMode='alpha';
+var _cred={}, _profLogueado=null, _profesoresLogin=[], _rolSel='admin';
+
+// ── UTILS ──
+function p2(n){ return String(n).padStart(2,'0'); }
+function dKey(d){ return d.toISOString().slice(0,10); }
+function fmtD(d){ return DIAS[d.getDay()]+' '+d.getDate()+' de '+MESC[d.getMonth()]; }
+function fmtFecha(k){ if(!k)return'—'; var p=k.split('-'); return parseInt(p[2])+' '+MESL[parseInt(p[1])-1]+' '+p[0]; }
+function getWAConf(){ try{ return JSON.parse(localStorage.getItem(WA_KEY)||'{}'); }catch(e){ return{}; } }
+function getPrecios(){ try{ return JSON.parse(localStorage.getItem(PRECIO_KEY)||'{}'); }catch(e){ return{}; } }
+function precioHora(veh){ var p=getPrecios(); return parseFloat(p[veh]||({coche:20,moto:25,camion:35}[veh]||20)); }
+function calcImporte(p){ var f=(parseInt(p.duracion)||45)/45; return Math.round(precioHora(p.vehiculo||'coche')*f*100)/100; }
+function fmtEur(n){ return n.toFixed(2).replace('.',',')+' €'; }
+function sync(s){ var d=document.getElementById('sync-dot'); if(d)d.className=s?'sync-dot '+s:''; }
+function toast(msg){
+  document.querySelectorAll('.toast').forEach(function(t){t.remove();});
+  var t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t); setTimeout(function(){t.remove();},3500);
+}
+function abrirSheet(id){ document.getElementById(id).classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function cerrarSheet(id){ document.getElementById(id).classList.add('hidden'); document.body.style.overflow=''; }
+function mostrarConfirm(opts){
+  document.getElementById('cfm-ico').textContent=opts.ico||'🗑️';
+  document.getElementById('cfm-title').textContent=opts.title||'';
+  document.getElementById('cfm-msg').textContent=opts.msg||'';
+  cfmCb=opts.okCb;
+  document.getElementById('sh-confirm').classList.remove('hidden');
+}
+function asignarColores(){ profColors={}; profesores.forEach(function(p,i){ profColors[p.id]=PROF_PAL[i%PROF_PAL.length]; }); }
+function getPin(){ return ['pin0','pin1','pin2','pin3'].map(function(id){ return document.getElementById(id).value||''; }).join(''); }
+
+// Sheets cierre
+document.querySelectorAll('.sheet-overlay').forEach(function(el){
+  el.addEventListener('click',function(e){ if(e.target===el)cerrarSheet(el.id); });
+});
+document.querySelectorAll('[data-close]').forEach(function(btn){
+  btn.onclick=function(){ cerrarSheet(btn.dataset.close); };
+});
+document.getElementById('btn-cfm-no').onclick=function(){ document.getElementById('sh-confirm').classList.add('hidden'); cfmCb=null; };
+document.getElementById('btn-cfm-ok').onclick=async function(){ if(cfmCb)await cfmCb(); document.getElementById('sh-confirm').classList.add('hidden'); cfmCb=null; };
+
+// PIN avance automático
+['pin0','pin1','pin2','pin3'].forEach(function(id,idx){
+  var el=document.getElementById(id);
+  el.addEventListener('input',function(){
+    el.value=el.value.replace(/[^0-9]/g,'');
+    if(el.value.length===1&&idx<3) document.getElementById('pin'+(idx+1)).focus();
+    if(idx===3&&el.value.length===1) setTimeout(entrar,80);
+  });
+  el.addEventListener('keydown',function(e){
+    if(e.key==='Backspace'&&el.value===''&&idx>0) document.getElementById('pin'+(idx-1)).focus();
+    if(e.key==='Enter') entrar();
+  });
+});
+
+// ── CREDENCIALES ──
+async function cargarCredenciales(){
+  try{
+    await waitAuth();
+    var doc=await db.collection('config').doc(CRED_DOC).get();
+    if(doc.exists){
+      _cred=doc.data();
+    }else{
+      _cred={adminNombre:'Admin',adminPin:'1234',jefeNombre:'Jefe',jefePin:'5678'};
+      await db.collection('config').doc(CRED_DOC).set(_cred);
+    }
+  }catch(e){
+    console.warn('cargarCredenciales error:',e.message);
+    if(!_cred.adminPin) _cred={adminNombre:'Admin',adminPin:'1234',jefeNombre:'Jefe',jefePin:'5678'};
+  }
+}
+
+// ── LOGIN ──
+function selRole(r){
+  _rolSel=r;
+  ['admin','jefe','prof'].forEach(function(id){ document.getElementById('role-'+id).classList.toggle('active',id===r); });
+  // Admin: nombre+PIN | Jefe: solo PIN | Profesor: dropdown+PIN
+  document.getElementById('wrap-nombre').classList.toggle('hidden', r!=='admin');
+  document.getElementById('wrap-prof-sel').classList.toggle('hidden', r!=='prof');
+  if(r==='prof') cargarProfesoresLogin();
+}
+
+async function cargarProfesoresLogin(){
+  var sel=document.getElementById('login-prof-sel');
+  sel.innerHTML='<option value="">— Cargando... —</option>';
+  try{
+    await waitAuth();
+    var snap=await db.collection('profesores').get();
+    _profesoresLogin=snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); });
+    _profesoresLogin.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+    sel.innerHTML=_profesoresLogin.length
+      ? '<option value="">— Selecciona tu nombre —</option>'+_profesoresLogin.map(function(p){ return '<option value="'+p.id+'">'+p.nombre+'</option>'; }).join('')
+      : '<option value="">— No hay profesores registrados —</option>';
+  }catch(e){
+    sel.innerHTML='<option value="">Error al cargar</option>';
+  }
+}
+
+document.getElementById('login-btn').onclick=entrar;
+
+async function entrar(){
+  var errEl=document.getElementById('login-error');
+  errEl.style.display='none';
+  var pin=getPin();
+  if(pin.length<4){ errEl.textContent='Introduce los 4 dígitos del PIN'; errEl.style.display='block'; return; }
+  // Siempre recargar credenciales para garantizar datos frescos de Firestore
+  await cargarCredenciales();
+  var btn=document.getElementById('login-btn');
+  btn.textContent='Entrando...'; btn.disabled=true;
+  var ok=false;
+  if(_rolSel==='admin'){
+    var nom=document.getElementById('login-nombre').value.trim();
+    if(!nom){ errEl.textContent='Introduce tu nombre'; errEl.style.display='block'; btn.textContent='Entrar'; btn.disabled=false; return; }
+    // Comparar nombre e intentar también sin nombre (solo PIN) por si el admin no lo ha configurado
+    var adminNom=(_cred.adminNombre||'admin').toLowerCase();
+    if(nom.toLowerCase()===adminNom && pin===(_cred.adminPin||'1234')){ rol='admin'; ok=true; }
+  }else if(_rolSel==='jefe'){
+    // Jefe: solo PIN
+    var jefePin=_cred.jefePin||'5678';
+    if(pin===jefePin){ rol='jefe'; ok=true; }
+    else{
+      // Debug: mostrar qué PIN espera el sistema
+      errEl.textContent='PIN incorrecto (esperado: '+jefePin+')';
+      errEl.style.display='block'; btn.textContent='Entrar'; btn.disabled=false;
+      ['pin0','pin1','pin2','pin3'].forEach(function(id){ document.getElementById(id).value=''; });
+      document.getElementById('pin0').focus();
+      return;
+    }
+  }else{
+    // Profesor: seleccionar nombre + PIN
+    var profId=document.getElementById('login-prof-sel').value;
+    if(!profId){ errEl.textContent='Selecciona tu nombre'; errEl.style.display='block'; btn.textContent='Entrar'; btn.disabled=false; return; }
+    var pd=_profesoresLogin.find(function(p){ return p.id===profId; });
+    if(!pd){ errEl.textContent='Profesor no encontrado. Recarga la página.'; errEl.style.display='block'; btn.textContent='Entrar'; btn.disabled=false; return; }
+    var profPin=pd.pin||'1234';
+    if(pin===profPin){ rol='profesor'; _profLogueado=pd; profSel=profId; ok=true; }
+    else{
+      errEl.textContent='PIN incorrecto para '+pd.nombre+' (esperado: '+profPin+')';
+      errEl.style.display='block'; btn.textContent='Entrar'; btn.disabled=false;
+      ['pin0','pin1','pin2','pin3'].forEach(function(id){ document.getElementById(id).value=''; });
+      document.getElementById('pin0').focus();
+      return;
+    }
+  }
+  btn.textContent='Entrar'; btn.disabled=false;
+  if(!ok){
+    errEl.textContent='Nombre o PIN incorrectos';
+    errEl.style.display='block';
+    ['pin0','pin1','pin2','pin3'].forEach(function(id){ document.getElementById(id).value=''; });
+    document.getElementById('pin0').focus();
+    return;
+  }
+  iniciarApp();
+}
+
+// ── LOGOUT ──
+document.getElementById('btn-salir').onclick=function(){
+  if(unsubCal){unsubCal();unsubCal=null;}
+  if(unsubProf){unsubProf();unsubProf=null;}
+  rol='';alumnos=[];profesores=[];profColors={};profSel='';_sbProfId='';
+  editAlId=null;fichaAlId=null;editProfId=null;_profLogueado=null;_cred={};
+  document.getElementById('main-app').classList.add('hidden');
+  document.getElementById('login-screen').classList.remove('hidden');
+  ['pin0','pin1','pin2','pin3'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('login-nombre').value='';
+  document.getElementById('login-error').style.display='none';
+  selRole('admin');
+};
+
+// ── INICIAR APP ──
+function iniciarApp(){
+  document.getElementById('login-screen').classList.add('hidden');
+  document.getElementById('main-app').classList.remove('hidden');
+  var esAdmin=rol==='admin', esJefe=rol==='jefe', esProf=rol==='profesor';
+  document.getElementById('rol-label').textContent=esAdmin?'Administrador':esJefe?'Jefe':'Profesor';
+  document.getElementById('cfg-rol').textContent=esAdmin?'Administrador':esJefe?'Jefe':'Profesor';
+  document.getElementById('user-name-display').textContent=esAdmin?(_cred.adminNombre||'Admin'):esJefe?(_cred.jefeNombre||'Jefe'):(_profLogueado?_profLogueado.nombre:'');
+  document.getElementById('btn-nuevo-al').classList.toggle('hidden',!esAdmin);
+  document.getElementById('cfg-admin').classList.toggle('hidden',!esAdmin);
+  document.getElementById('cfg-jefe').classList.toggle('hidden',!esJefe);
+  var pm=document.getElementById('prof-mgmt'); if(pm)pm.classList.toggle('hidden',!esAdmin);
+  var pl=document.getElementById('prof-list-wrap'); if(pl)pl.classList.toggle('hidden',!esAdmin);
+  var dashBtn=document.getElementById('tab-btn-dash'); if(dashBtn)dashBtn.style.display=(esAdmin||esJefe)?'':'none';
+  document.querySelectorAll('.tab').forEach(function(b){
+    if(esProf) b.style.display=['admin','alumnos','profesor'].indexOf(b.dataset.tab)>=0?'':'none';
+    else b.style.display='';
+  });
+  sortMode=localStorage.getItem(SORT_KEY)||'alpha';
+  document.querySelectorAll('[data-sort]').forEach(function(b){ b.classList.toggle('active',b.dataset.sort===sortMode); });
+  var pc=getPrecios();
+  if(pc.coche) document.getElementById('precio-coche').value=pc.coche;
+  if(pc.moto) document.getElementById('precio-moto').value=pc.moto;
+  if(pc.camion) document.getElementById('precio-camion').value=pc.camion;
+  var wc=getWAConf();
+  if(wc.key) document.getElementById('wa-key').value=wc.key;
+  if(wc.phone) document.getElementById('wa-phone').value=wc.phone;
+  initData();
+  irTab(esProf?'profesor':'admin');
+}
+
+// ── TABS ──
+document.querySelectorAll('.tab').forEach(function(btn){ btn.onclick=function(){ irTab(btn.dataset.tab); }; });
+function irTab(t){
+  ['admin','profesor','alumnos','dashboard','config'].forEach(function(id){
+    document.getElementById('tab-'+id).classList.toggle('hidden',id!==t);
+  });
+  document.querySelectorAll('.tab').forEach(function(b){ b.classList.toggle('active',b.dataset.tab===t); });
+  if(t==='admin') subscribeCal();
+  if(t==='profesor'){
+    document.getElementById('prof-admin-nav').style.display=rol==='admin'?'':'none';
+    document.getElementById('prof-self-nav').style.display=rol==='profesor'?'':'none';
+    if(rol==='admin') renderProfesores();
+    if(rol==='profesor'&&!profSel&&_profLogueado) profSel=_profLogueado.id;
+    subscribeProf();
+  }
+  if(t==='alumnos') renderAlumnos();
+  if(t==='dashboard') renderDashboard();
+  if(t==='config'&&rol==='admin'){
+    var n=document.getElementById('cfg-admin-nombre'); if(n&&_cred.adminNombre) n.placeholder=_cred.adminNombre+' (actual)';
+    var j=document.getElementById('cfg-jefe-nombre'); if(j&&_cred.jefeNombre) j.placeholder=_cred.jefeNombre+' (actual)';
+  }
+}
+
+// ── INIT DATA ──
+async function initData(){
+  sync('syncing');
+  try{
+    await waitAuth();
+    var res=await Promise.all([db.collection('alumnos').get(), db.collection('profesores').get()]);
+    alumnos=res[0].docs.map(function(d){ return Object.assign({id:d.id},d.data()); });
+    profesores=res[1].docs.map(function(d){ return Object.assign({id:d.id},d.data()); });
+    asignarColores(); actualizarSelectProfs(); actualizarSb(); renderAlumnos(); subscribeCal(); sync('online');
+  }catch(e){ toast('Error conexión: '+e.message); sync(''); }
+}
+
+// ── CALENDARIO ──
+document.getElementById('btn-dia-prev').onclick=function(){ cambiarDia(-1); };
+document.getElementById('btn-dia-next').onclick=function(){ cambiarDia(1); };
+document.getElementById('btn-hoy').onclick=function(){ currentDate=new Date(); subscribeCal(); };
+document.getElementById('btn-nueva-cita').onclick=function(){
+  if(rol!=='admin'){ toast('Solo el administrador puede añadir prácticas'); return; }
+  abrirNuevaPrac('');
+};
+function cambiarDia(n){ currentDate=new Date(currentDate); currentDate.setDate(currentDate.getDate()+n); subscribeCal(); }
+
+function subscribeCal(){
+  if(unsubCal){ unsubCal(); unsubCal=null; }
+  document.getElementById('fecha-label').textContent=fmtD(currentDate);
+  document.getElementById('cal-body').innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
+  sync('syncing');
+  unsubCal=db.collection('practicas_'+dKey(currentDate)).onSnapshot(function(snap){
+    window._pracHoy=snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); });
+    window._pracHoy.sort(function(a,b){ return (a.hora||'').localeCompare(b.hora||''); });
+    renderCalendario(window._pracHoy); sync('online');
+  },function(e){
+    document.getElementById('cal-body').innerHTML='<div class="empty"><div class="eico">⚠️</div><p>'+e.message+'</p></div>';
+    sync('');
+  });
+}
+
+function renderCalendario(prs){
+  document.getElementById('fecha-label').textContent=fmtD(currentDate);
+  var esAdmin=rol==='admin';
+  if(_sbProfId) prs=prs.filter(function(p){ return p.profesorId===_sbProfId; });
+  var legend=document.getElementById('cal-legend');
+  if(profesores.length&&!_sbProfId){
+    legend.innerHTML=profesores.map(function(p){
+      var c=profColors[p.id]||PROF_PAL[0];
+      return '<span style="padding:2px 8px;border-radius:4px;font-size:9px;font-weight:600;background:'+c.bg+';color:'+c.tx+';border:1px solid '+c.bd+'">'+(p.nombre||'')+'</span>';
+    }).join('');
+    legend.style.display='';
+  }else{ legend.innerHTML=''; legend.style.display='none'; }
+  var body=document.getElementById('cal-body');
+  if(!prs.length){
+    body.innerHTML='<div class="empty"><div class="eico">📅</div><p>Sin citas hoy</p>'+(esAdmin?'<div style="margin-top:10px"><button onclick="abrirNuevaPrac(\'\')" style="padding:6px 14px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:12px;font-weight:700;cursor:pointer">+ Nueva cita</button></div>':'')+'</div>';
+    return;
+  }
+  var byHour={};
+  prs.forEach(function(p){ var h=(p.hora||'??').split(':')[0]; if(!byHour[h])byHour[h]=[]; byHour[h].push(p); });
+  var hours=Object.keys(byHour).sort(function(a,b){ return parseInt(a)-parseInt(b); });
+  var rows='';
+  hours.forEach(function(h){
+    var group=byHour[h].slice().sort(function(a,b){ return (a.hora||'').localeCompare(b.hora||''); });
+    var cells=group.map(function(p){
+      var c=p.profesorId&&profColors[p.profesorId]?profColors[p.profesorId]:PROF_PAL[0];
+      var firmIco=p.firmada?'<span style="color:var(--green);font-size:9px"> ✓</span>':'<span style="font-size:9px;opacity:.45"> ✍</span>';
+      var nom=(p.alumnoNombre||'?').split(' ')[0];
+      var profNom=_sbProfId?'':('<span style="font-size:9px;opacity:.55;margin-left:3px">'+(p.profesorNombre||'').split(' ')[0]+'</span>');
+      var delBtn=esAdmin?('<button class="chip-x" data-id="'+p.id+'" data-hora="'+p.hora+'" data-nom="'+(p.alumnoNombre||'')+'">✕</button>'):'';
+      var vico=p.vehiculo==='moto'?'🏍':p.vehiculo==='camion'?'🚛':'🚗';
+      var dur=p.duracion===30?'<span style="font-size:8px;opacity:.55"> 30\'</span>':'';
+      var clk=(!p.firmada&&(esAdmin||rol==='profesor'))?'cursor:pointer;border-style:dashed':'';
+      return '<div class="cal-chip" style="background:'+c.bg+';color:'+c.tx+';border-color:'+c.bd+';'+clk+'" data-id="'+p.id+'" data-firmada="'+(p.firmada?'1':'0')+'" data-hora="'+p.hora+'" data-nom="'+(p.alumnoNombre||'')+'">'
+        +'<div style="font-size:10px;font-weight:700;font-family:var(--mono)">'+p.hora+dur+'</div>'
+        +'<div style="font-size:11px;font-weight:600;margin-top:1px">'+vico+' '+nom+profNom+'</div>'
+        +firmIco+delBtn+'</div>';
+    }).join('');
+    var addBtn=esAdmin?'<button class="btn-add-slot" onclick="abrirNuevaPrac(\'\')">+</button>':'';
+    rows+='<div class="cal-hour-row"><div class="cal-hora">'+h+'h</div><div class="cal-hour-slots">'+cells+addBtn+'</div></div>';
+  });
+  body.innerHTML=rows;
+  body.querySelectorAll('.chip-x').forEach(function(x){ x.onclick=function(e){ e.stopPropagation(); delPrac(x.dataset.id,x.dataset.hora,x.dataset.nom); }; });
+  if(esAdmin||rol==='profesor'){
+    body.querySelectorAll('.cal-chip').forEach(function(chip){
+      if(chip.dataset.firmada==='0'){
+        chip.onclick=function(e){
+          if(e.target.classList.contains('chip-x')) return;
+          var p=window._pracHoy&&window._pracHoy.find(function(x){ return x.id===chip.dataset.id; });
+          if(p) abrirFirma(p.fecha||dKey(currentDate),chip.dataset.id,chip.dataset.nom);
+        };
+      }
+    });
+  }
+}
+
+function selSb(btn,pid){
+  _sbProfId=pid||'';
+  document.querySelectorAll('#prof-sb .sb-btn').forEach(function(b){ b.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  subscribeCal();
+}
+function actualizarSb(){
+  var list=document.getElementById('sb-list'); if(!list) return;
+  list.innerHTML=profesores.map(function(p){
+    var nm=(p.nombre||'?').toUpperCase().slice(0,7);
+    return '<button class="sb-btn'+(p.id===_sbProfId?' active':'')+'" data-profid="'+p.id+'" title="'+(p.nombre||'')+'">👤<br>'+nm+'</button>';
+  }).join('');
+  // Eventos con addEventListener — sin problemas de escapes
+  list.querySelectorAll('.sb-btn').forEach(function(btn){
+    btn.onclick=function(){ selSb(btn,btn.dataset.profid); };
+  });
+}
+
+function abrirNuevaPrac(hora){
+  if(rol!=='admin'){ toast('Solo el admin puede añadir prácticas'); return; }
+  document.getElementById('m-hora').value=hora||'';
+  document.querySelectorAll('.dur-opt').forEach(function(o){ o.classList.remove('sel'); });
+  document.querySelector('.dur-opt[data-dur="45"]').classList.add('sel');
+  document.getElementById('m-duracion').value='45';
+  var alSort=[].concat(alumnos).sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+  document.getElementById('m-alumno').innerHTML=alSort.map(function(a){ return '<option value="'+a.id+'">'+a.nombre+'</option>'; }).join('');
+  document.getElementById('m-prof').innerHTML='<option value="">— Sin asignar —</option>'+profesores.map(function(p){ return '<option value="'+p.id+'"'+(p.id===_sbProfId?' selected':'')+'>'+p.nombre+'</option>'; }).join('');
+  abrirSheet('sh-practica');
+}
+document.querySelectorAll('.dur-opt').forEach(function(o){
+  o.onclick=function(){ document.querySelectorAll('.dur-opt').forEach(function(x){ x.classList.remove('sel'); }); o.classList.add('sel'); document.getElementById('m-duracion').value=o.dataset.dur; };
+});
+document.getElementById('btn-guardar-prac').onclick=async function(){
+  if(rol!=='admin'){ toast('Sin permisos'); return; }
+  var hora=document.getElementById('m-hora').value;
+  var dur=parseInt(document.getElementById('m-duracion').value)||45;
+  var alId=document.getElementById('m-alumno').value;
+  var prId=document.getElementById('m-prof').value;
+  var veh=document.getElementById('m-vehiculo').value;
+  var al=alumnos.find(function(a){ return a.id===alId; });
+  var pr=profesores.find(function(p){ return p.id===prId; });
+  if(!al){ toast('Selecciona un alumno'); return; }
+  if(!hora){ toast('Introduce la hora'); return; }
+  sync('syncing');
+  var fecha=dKey(currentDate);
+  var data={hora:hora,duracion:dur,alumnoId:alId,alumnoNombre:al.nombre,profesorId:prId||'',profesorNombre:pr?pr.nombre:'Sin asignar',vehiculo:veh,firmada:false,firmaBase64:'',firmaTimestamp:''};
+  try{
+    await db.collection('fechas_usadas').doc(fecha).set({fecha:fecha});
+    var ref=await db.collection('practicas_'+fecha).add(data);
+    cerrarSheet('sh-practica'); toast('Práctica añadida ✓');
+    setTimeout(function(){ abrirWA(Object.assign({},data,{id:ref.id,fecha:fecha})); },350);
+  }catch(e){ sync(''); toast('Error: '+e.message); }
+};
+function delPrac(id,hora,nombre){
+  if(rol!=='admin'){ toast('Sin permisos'); return; }
+  mostrarConfirm({ico:'🗑️',title:'¿Borrar práctica?',msg:(nombre||'Alumno')+' · '+hora,
+    okCb:async function(){
+      sync('syncing');
+      try{ await db.collection('practicas_'+dKey(currentDate)).doc(id).delete(); toast('Eliminada'); }
+      catch(e){ sync(''); toast('Error: '+e.message); }
+    }
+  });
+}
+
+// ── PROFESOR ──
+function actualizarSelectProfs(){
+  var sel=document.getElementById('prof-select'); var val=sel.value;
+  sel.innerHTML='<option value="">— Selecciona un profesor —</option>'+profesores.map(function(p){ return '<option value="'+p.id+'">'+p.nombre+'</option>'; }).join('');
+  if(val) sel.value=val;
+}
+document.getElementById('prof-select').onchange=function(){ profSel=this.value; subscribeProf(); };
+document.getElementById('btn-prof-prev').onclick=function(){ profDate=new Date(profDate); profDate.setDate(profDate.getDate()-1); subscribeProf(); };
+document.getElementById('btn-prof-next').onclick=function(){ profDate=new Date(profDate); profDate.setDate(profDate.getDate()+1); subscribeProf(); };
+document.getElementById('btn-prof-prev2').onclick=function(){ profDate=new Date(profDate); profDate.setDate(profDate.getDate()-1); subscribeProf(); };
+document.getElementById('btn-prof-next2').onclick=function(){ profDate=new Date(profDate); profDate.setDate(profDate.getDate()+1); subscribeProf(); };
+
+function subscribeProf(){
+  if(unsubProf){ unsubProf(); unsubProf=null; }
+  if(rol==='profesor'&&!profSel&&_profLogueado) profSel=_profLogueado.id;
+  var target=profSel;
+  ['fecha-prof-label','fecha-prof-label2'].forEach(function(id){ var el=document.getElementById(id); if(el)el.textContent=fmtD(profDate); });
+  if(!target){
+    document.getElementById('prac-list').innerHTML='<div class="empty"><div class="eico">👨‍🏫</div><p>'+(rol==='admin'?'Selecciona un profesor':'Sin prácticas')+'</p></div>';
+    return;
+  }
+  document.getElementById('prac-list').innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
+  sync('syncing');
+  unsubProf=db.collection('practicas_'+dKey(profDate)).onSnapshot(function(snap){
+    var prs=snap.docs.map(function(d){ return Object.assign({id:d.id},d.data()); })
+      .filter(function(p){ return p.profesorId===target; })
+      .sort(function(a,b){ return (a.hora||'').localeCompare(b.hora||''); });
+    renderProfesor(prs); sync('online');
+  },function(e){ sync(''); });
+}
+
+function renderProfesor(prs){
+  ['fecha-prof-label','fecha-prof-label2'].forEach(function(id){ var el=document.getElementById(id); if(el)el.textContent=fmtD(profDate); });
+  var list=document.getElementById('prac-list');
+  if(!prs.length){ list.innerHTML='<div class="empty"><div class="eico">📅</div><p>Sin prácticas este día</p></div>'; return; }
+  var firmadas=prs.filter(function(p){ return p.firmada; }).length;
+  var html='<div style="padding:3px 0 8px;font-size:11px;color:var(--text2);font-weight:600">'+fmtD(profDate)+' · '+prs.length+' prácticas · <span style="color:var(--green)">'+firmadas+' firmadas</span> · <span style="color:var(--red)">'+(prs.length-firmadas)+' pendientes</span></div>';
+  html+=prs.map(function(p){
+    var veh=p.vehiculo||'coche'; var vico=veh==='moto'?'🏍️':veh==='camion'?'🚛':'🚗';
+    return '<div class="prac-card'+(p.firmada?' firmada':'')+'">'
+      +'<div class="prac-hora">'+(p.hora||'')+'</div>'
+      +'<div><div class="prac-nom">'+(p.alumnoNombre||'')+'</div>'
+        +'<div class="prac-sub"><span class="vbadge '+veh+'">'+vico+' '+veh+'</span><span style="font-size:9px;color:var(--text3)">'+(p.duracion||45)+'min</span></div></div>'
+      +'<div>'+(p.firmada?'<div class="firma-ok">✓</div>':'<button class="btn-firmar" data-fecha="'+dKey(profDate)+'" data-id="'+p.id+'" data-nom="'+(p.alumnoNombre||'')+'">✍️ Firmar</button>')+'</div></div>';
+  }).join('');
+  list.innerHTML=html;
+  list.querySelectorAll('.btn-firmar').forEach(function(btn){ btn.onclick=function(){ abrirFirma(btn.dataset.fecha,btn.dataset.id,btn.dataset.nom); }; });
+}
+
+// ── PROFESORES CRUD ──
+function renderProfesores(){
+  var body=document.getElementById('prof-body');
+  if(!profesores.length){ body.innerHTML='<div class="empty"><div class="eico">👨‍🏫</div><p>Sin profesores</p></div>'; return; }
+  body.innerHTML=profesores.map(function(p){
+    var ini=(p.nombre||'??').split(' ').map(function(w){ return w[0]; }).slice(0,2).join('').toUpperCase();
+    var c=profColors[p.id]||PROF_PAL[0];
+    return '<div class="arow">'
+      +'<div class="avatar" style="background:'+c.bg+';color:'+c.tx+';border:1px solid '+c.bd+'">'+ini+'</div>'
+      +'<div class="arow-info"><div class="arow-nom">'+(p.nombre||'')+'</div>'
+        +'<div class="arow-sub">'+(p.especialidad||'')+' · PIN: '+(p.pin?'configurado':'1234')+'</div></div>'
+      +'<button class="icon-btn edit-btn" data-id="'+p.id+'">✏️</button>'
+      +'<button class="icon-btn del-btn" data-id="'+p.id+'" data-nom="'+(p.nombre||'')+'">🗑️</button>'
+      +'</div>';
+  }).join('');
+  body.querySelectorAll('.edit-btn').forEach(function(btn){
+    btn.onclick=function(){
+      var p=profesores.find(function(x){ return x.id===btn.dataset.id; }); if(!p) return;
+      editProfId=p.id;
+      document.getElementById('sh-prof-titulo').textContent='Editar profesor';
+      document.getElementById('pr-nom').value=p.nombre||'';
+      document.getElementById('pr-tel').value=p.telefono||'';
+      document.getElementById('pr-pin').value='';
+      document.getElementById('pr-esp').value=p.especialidad||'coche';
+      abrirSheet('sh-prof');
+    };
+  });
+  body.querySelectorAll('.del-btn').forEach(function(btn){
+    btn.onclick=function(){
+      if(rol!=='admin'){ toast('Sin permisos'); return; }
+      mostrarConfirm({ico:'👨‍🏫',title:'¿Borrar profesor?',msg:btn.dataset.nom||'',
+        okCb:async function(){
+          sync('syncing');
+          try{
+            await db.collection('profesores').doc(btn.dataset.id).delete();
+            profesores=profesores.filter(function(p){ return p.id!==btn.dataset.id; });
+            asignarColores(); actualizarSelectProfs(); actualizarSb(); renderProfesores();
+            sync('online'); toast('Eliminado');
+          }catch(e){ sync(''); toast('Error: '+e.message); }
+        }
+      });
+    };
+  });
+}
+document.getElementById('btn-nuevo-prof').onclick=function(){
+  editProfId=null;
+  document.getElementById('sh-prof-titulo').textContent='Nuevo profesor';
+  ['pr-nom','pr-tel','pr-pin'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('pr-esp').value='coche';
+  abrirSheet('sh-prof');
+};
+document.getElementById('btn-guardar-prof').onclick=async function(){
+  if(rol!=='admin'){ toast('Sin permisos'); return; }
+  var nombre=document.getElementById('pr-nom').value.trim();
+  if(!nombre){ toast('Introduce el nombre'); return; }
+  var pin=document.getElementById('pr-pin').value.trim();
+  if(pin&&(pin.length!==4||!/^\d{4}$/.test(pin))){ toast('El PIN debe tener 4 dígitos'); return; }
+  sync('syncing');
+  try{
+    var datos={nombre:nombre,telefono:document.getElementById('pr-tel').value.trim(),especialidad:document.getElementById('pr-esp').value};
+    if(pin) datos.pin=pin;
+    if(editProfId){
+      await db.collection('profesores').doc(editProfId).update(datos);
+      var idx=profesores.findIndex(function(p){ return p.id===editProfId; });
+      if(idx>=0) profesores[idx]=Object.assign({},profesores[idx],datos);
+    }else{
+      if(!datos.pin) datos.pin='1234';
+      var ref=await db.collection('profesores').add(datos);
+      profesores.push(Object.assign({id:ref.id},datos));
+    }
+    profesores.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+    asignarColores(); actualizarSelectProfs(); actualizarSb(); renderProfesores();
+    editProfId=null; cerrarSheet('sh-prof'); sync('online'); toast('Profesor guardado ✓');
+  }catch(e){ sync(''); toast('Error: '+e.message); }
+};
+
+// ── ALUMNOS ──
+document.querySelectorAll('[data-sort]').forEach(function(btn){
+  btn.onclick=function(){
+    sortMode=btn.dataset.sort; localStorage.setItem(SORT_KEY,sortMode);
+    document.querySelectorAll('[data-sort]').forEach(function(b){ b.classList.toggle('active',b.dataset.sort===sortMode); });
+    renderAlumnos();
+  };
+});
+document.getElementById('search-al').oninput=renderAlumnos;
+document.getElementById('btn-nuevo-al').onclick=abrirNuevoAl;
+
+function renderAlumnos(){
+  var q=(document.getElementById('search-al').value||'').toLowerCase();
+  var fil=alumnos.filter(function(a){ return (a.nombre||'').toLowerCase().includes(q)||(a.telefono||'').includes(q); });
+  fil.sort(sortMode==='alpha'?function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); }:function(a,b){ return (a.createdAt||0)-(b.createdAt||0); });
+  var esAdmin=rol==='admin';
+  var body=document.getElementById('al-body');
+  if(!fil.length){ body.innerHTML='<div class="empty"><div class="eico">👥</div><p>Sin alumnos</p></div>'; return; }
+  body.innerHTML=fil.map(function(a){
+    var ini=(a.nombre||'??').split(' ').map(function(w){ return w[0]; }).slice(0,2).join('').toUpperCase();
+    var btns=(esAdmin||rol==='profesor'||rol==='jefe')
+      ?'<button onclick="abrirHistorialAl(\''+a.id+'\',\''+a.nombre+'\')" style="background:rgba(49,109,202,.15);color:var(--accent3);border:1px solid rgba(49,109,202,.25);border-radius:4px;padding:3px 7px;font-size:9px;font-weight:700;cursor:pointer;margin-right:3px">📋</button>'
+        +(esAdmin?'<button class="icon-btn edit-btn" data-id="'+a.id+'">✏️</button><button class="icon-btn del-btn" data-id="'+a.id+'" data-nom="'+(a.nombre||'')+'">🗑️</button>':'')
+      :'';
+    return '<div class="arow"><div class="avatar" data-id="'+a.id+'">'+ini+'</div>'
+      +'<div class="arow-info" data-id="'+a.id+'"><div class="arow-nom">'+(a.nombre||'')+'</div>'
+        +'<div class="arow-sub">'+(a.telefono||'Sin teléfono')+' · <span class="carnet-tag">'+(a.carnet||'B')+'</span></div></div>'
+      +btns+'</div>';
+  }).join('');
+  body.querySelectorAll('.avatar,.arow-info').forEach(function(el){ el.onclick=function(){ abrirFicha(el.dataset.id); }; });
+  body.querySelectorAll('.edit-btn').forEach(function(btn){ btn.onclick=function(e){ e.stopPropagation(); abrirEditAl(btn.dataset.id); }; });
+  body.querySelectorAll('.del-btn').forEach(function(btn){
+    btn.onclick=function(e){
+      e.stopPropagation(); if(rol!=='admin'){ toast('Sin permisos'); return; }
+      mostrarConfirm({ico:'👤',title:'¿Borrar alumno?',msg:btn.dataset.nom||'',
+        okCb:async function(){
+          sync('syncing');
+          try{ await db.collection('alumnos').doc(btn.dataset.id).delete(); alumnos=alumnos.filter(function(a){ return a.id!==btn.dataset.id; }); renderAlumnos(); sync('online'); toast('Eliminado'); }
+          catch(e){ sync(''); toast('Error: '+e.message); }
+        }
+      });
+    };
+  });
+}
+
+function abrirFicha(id){
+  fichaAlId=id; var a=alumnos.find(function(x){ return x.id===id; }); if(!a) return;
+  document.getElementById('ficha-nom').textContent=a.nombre||'';
+  document.getElementById('ficha-sub2').textContent='Carnet '+(a.carnet||'');
+  document.getElementById('f-nom').textContent=a.nombre||'';
+  document.getElementById('f-tel').textContent=a.telefono||'Sin teléfono';
+  document.getElementById('f-carnet').textContent=a.carnet||'';
+  document.getElementById('f-alta').textContent=a.createdAt?new Date(a.createdAt).toLocaleDateString('es-ES'):'—';
+  var el=document.getElementById('f-notas');
+  if(a.notas&&a.notas.trim()){ el.textContent=a.notas; el.classList.remove('vacio'); }
+  else{ el.textContent='Sin notas'; el.classList.add('vacio'); }
+  abrirSheet('sh-ficha');
+}
+document.getElementById('btn-editar-ficha').onclick=function(){ cerrarSheet('sh-ficha'); setTimeout(function(){ abrirEditAl(fichaAlId); },250); };
+document.getElementById('btn-historial-ficha').onclick=function(){ cerrarSheet('sh-ficha'); setTimeout(function(){ abrirHistorialAl(fichaAlId,''); },250); };
+
+function abrirNuevoAl(){
+  if(rol!=='admin'){ toast('Sin permisos'); return; }
+  editAlId=null; document.getElementById('sh-al-titulo').textContent='Nuevo alumno';
+  ['al-nombre','al-tel','al-notas'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('al-carnet').value='B'; document.getElementById('al-notas-c').textContent='0';
+  abrirSheet('sh-alumno');
+}
+function abrirEditAl(id){
+  if(rol!=='admin'){ toast('Sin permisos'); return; }
+  var a=alumnos.find(function(x){ return x.id===id; }); if(!a) return;
+  editAlId=id; document.getElementById('sh-al-titulo').textContent='Editar alumno';
+  document.getElementById('al-nombre').value=a.nombre||'';
+  document.getElementById('al-tel').value=a.telefono||'';
+  document.getElementById('al-carnet').value=a.carnet||'B';
+  document.getElementById('al-notas').value=a.notas||'';
+  document.getElementById('al-notas-c').textContent=(a.notas||'').length;
+  abrirSheet('sh-alumno');
+}
+document.getElementById('al-notas').oninput=function(){ document.getElementById('al-notas-c').textContent=this.value.length; };
+document.getElementById('btn-guardar-alumno').onclick=async function(){
+  if(rol!=='admin'){ toast('Sin permisos'); return; }
+  var nombre=document.getElementById('al-nombre').value.trim();
+  if(!nombre){ toast('Introduce el nombre'); return; }
+  var datos={nombre:nombre.slice(0,100),telefono:document.getElementById('al-tel').value.trim(),carnet:document.getElementById('al-carnet').value,notas:document.getElementById('al-notas').value.trim()};
+  sync('syncing');
+  try{
+    if(editAlId){
+      await db.collection('alumnos').doc(editAlId).update(datos);
+      var idx=alumnos.findIndex(function(a){ return a.id===editAlId; });
+      if(idx>=0) alumnos[idx]=Object.assign({},alumnos[idx],datos);
+      toast('Actualizado ✓');
+    }else{
+      datos.createdAt=Date.now();
+      var ref=await db.collection('alumnos').add(datos);
+      alumnos.push(Object.assign({id:ref.id},datos));
+      toast('Alumno añadido ✓');
+    }
+    editAlId=null; cerrarSheet('sh-alumno'); renderAlumnos(); sync('online');
+  }catch(e){ sync(''); toast('Error: '+e.message); }
+};
+
+// ── HISTORIAL ──
+async function abrirHistorialAl(alId,alNombre){
+  var a=alumnos.find(function(x){ return x.id===alId; }); fichaAlId=alId;
+  document.getElementById('hist-nom').textContent=alNombre||(a?a.nombre:'');
+  document.getElementById('hist-sub').textContent='Cargando...';
+  document.getElementById('hist-rows').innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
+  var eb=document.getElementById('hist-export-btns'); if(eb)eb.style.display=rol==='admin'?'flex':'none';
+  abrirSheet('sh-hist'); sync('syncing');
+  try{
+    var fSnap=await db.collection('fechas_usadas').get();
+    var fechas=fSnap.docs.map(function(d){ return d.id; });
+    var results=await Promise.all(fechas.map(function(f){
+      return db.collection('practicas_'+f).where('alumnoId','==',alId).get()
+        .then(function(s){ return s.docs.map(function(d){ return Object.assign({id:d.id,fecha:f},d.data()); }); })
+        .catch(function(){ return []; });
+    }));
+    histTodas=[]; results.forEach(function(arr){ arr.forEach(function(p){ histTodas.push(p); }); });
+    histTodas.sort(function(a,b){ return (b.fecha||'').localeCompare(a.fecha||'')||(a.hora||'').localeCompare(b.hora||''); });
+    var firmadas=histTodas.filter(function(p){ return p.firmada; }).length;
+    document.getElementById('hist-sub').textContent='Carnet '+(a?a.carnet||'':'');
+    document.getElementById('hist-stats').innerHTML=
+      '<div class="stat-box"><div class="stat-num">'+histTodas.length+'</div><div class="stat-lbl">Total</div></div>'+
+      '<div class="stat-box"><div class="stat-num">'+firmadas+'</div><div class="stat-lbl">Firmadas</div></div>'+
+      '<div class="stat-box"><div class="stat-num">'+(histTodas.length-firmadas)+'</div><div class="stat-lbl">Pendientes</div></div>';
+    if(!histTodas.length){ document.getElementById('hist-rows').innerHTML='<div class="empty"><div class="eico">📋</div><p>Sin prácticas</p></div>'; sync('online'); return; }
+    document.getElementById('hist-rows').innerHTML=histTodas.map(function(p){
+      var veh=p.vehiculo||'coche'; var vico=veh==='moto'?'🏍️':veh==='camion'?'🚛':'🚗';
+      var src=p.firmaBase64||'';
+      var firmaHtml=p.firmada
+        ?'<span class="firma-tag ok">✓ '+(p.firmaTimestamp||'')+'</span>'+(src?'<img class="firma-thumb" src="'+src+'" data-id="'+p.id+'" alt="Firma">':'')
+        :'<span class="firma-tag no">Pendiente</span>';
+      return '<div class="hist-row">'
+        +'<div style="min-width:82px;flex-shrink:0"><div style="font-size:9px;color:var(--text3)">'+fmtFecha(p.fecha)+'</div>'
+          +'<div style="font-weight:700;font-size:13px;color:var(--accent3);font-family:var(--mono)">'+(p.hora||'')+'</div></div>'
+        +'<span class="vbadge '+veh+'">'+vico+' '+veh+'</span>'
+        +'<span class="prof-tag">'+((p.profesorNombre||'—').split(' ')[0])+'</span>'
+        +'<div style="margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:wrap">'+firmaHtml+'</div>'
+        +'</div>';
+    }).join('');
+    document.querySelectorAll('.firma-thumb').forEach(function(img){ img.onclick=function(){ verFirma(img.dataset.id); }; });
+    sync('online');
+  }catch(e){ sync(''); toast('Error historial: '+e.message); }
+}
+document.getElementById('btn-csv').onclick=function(){
+  var a=alumnos.find(function(x){ return x.id===fichaAlId; });
+  if(!a||!histTodas.length){ toast('Sin datos'); return; }
+  function esc(v){ var s=String(v===null||v===undefined?'':v); return (s.includes(',')||s.includes('"'))?'"'+s.replace(/"/g,'""')+'"':s; }
+  var rows=[['Fecha','Hora','Duración','Vehículo','Profesor','Firmada','Hora firma'].join(',')];
+  histTodas.forEach(function(p){ rows.push([fmtFecha(p.fecha),p.hora||'',(p.duracion||45)+'min',p.vehiculo||'coche',p.profesorNombre||'—',p.firmada?'Si':'No',p.firmaTimestamp||'—'].map(esc).join(',')); });
+  var csv='\uFEFF'+rows.join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var el=document.createElement('a'); el.href=url; el.download='Historial_'+a.nombre.replace(/\s+/g,'_')+'.csv'; el.style.display='none';
+  document.body.appendChild(el); el.click(); setTimeout(function(){ document.body.removeChild(el); URL.revokeObjectURL(url); },2000);
+  toast('CSV descargado ✓');
+};
+function verFirma(id){
+  vfData=histTodas.find(function(x){ return x.id===id; }); if(!vfData) return;
+  var src=vfData.firmaBase64||''; if(!src) return;
+  document.getElementById('vf-nom').textContent=vfData.alumnoNombre||'Firma';
+  document.getElementById('vf-img').src=src;
+  abrirSheet('sh-ver-firma');
+}
+document.getElementById('btn-descargar-firma').onclick=function(){
+  if(!vfData) return; var src=vfData.firmaBase64||''; if(!src) return;
+  var a=document.createElement('a'); a.href=src; a.download='Firma_'+(vfData.alumnoNombre||'alumno')+'_'+vfData.fecha+'.png'; a.click();
+};
+
+// ── FIRMA CANVAS ──
+function abrirFirma(fecha,pracId,nombre){
+  firmaTgt={fecha:fecha,pracId:pracId};
+  document.getElementById('firma-sub').textContent=nombre||'';
+  abrirSheet('sh-firma');
+  setTimeout(function(){
+    canvas=document.getElementById('firma-canvas'); ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle='#1c5eb0'; ctx.lineWidth=4; ctx.lineCap='round'; ctx.lineJoin='round';
+    dibujando=false;
+    function pt(e){ var r=canvas.getBoundingClientRect(); return {x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}; }
+    canvas.onmousedown=function(e){ dibujando=true; var p=pt(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); };
+    canvas.onmousemove=function(e){ if(!dibujando)return; var p=pt(e); ctx.lineTo(p.x,p.y); ctx.stroke(); };
+    canvas.onmouseup=function(){ dibujando=false; };
+    canvas.addEventListener('touchstart',function(e){ e.preventDefault(); dibujando=true; var t=e.touches[0]; var r=canvas.getBoundingClientRect(); ctx.beginPath(); ctx.moveTo((t.clientX-r.left)*canvas.width/r.width,(t.clientY-r.top)*canvas.height/r.height); },{passive:false});
+    canvas.addEventListener('touchmove',function(e){ e.preventDefault(); if(!dibujando)return; var t=e.touches[0]; var r=canvas.getBoundingClientRect(); ctx.lineTo((t.clientX-r.left)*canvas.width/r.width,(t.clientY-r.top)*canvas.height/r.height); ctx.stroke(); },{passive:false});
+    canvas.ontouchend=function(){ dibujando=false; };
+  },150);
+}
+document.getElementById('btn-limpiar').onclick=function(){ if(ctx)ctx.clearRect(0,0,canvas.width,canvas.height); };
+
+document.getElementById('btn-confirmar-firma').onclick=async function(){
+  if(!firmaTgt) return;
+  // Verificar que hay firma dibujada
+  var imgData=ctx.getImageData(0,0,canvas.width,canvas.height);
+  var hayFirma=false;
+  for(var i=0;i<imgData.data.length;i+=4){ if(imgData.data[i+3]>10){ hayFirma=true; break; } }
+  if(!hayFirma){ toast('Dibuja la firma primero'); return; }
+  var b64=canvas.toDataURL('image/png');
+  var now=new Date(); var ts=p2(now.getHours())+':'+p2(now.getMinutes());
+  sync('syncing');
+  try{
+    await db.collection('practicas_'+firmaTgt.fecha).doc(firmaTgt.pracId).update({
+      firmada:true, firmaTimestamp:ts, firmaBase64:b64
+    });
+    cerrarSheet('sh-firma'); sync('online'); toast('Firma registrada ✓');
+  }catch(e){ sync(''); toast('Error al guardar firma: '+e.message); }
+};
+
+// ── DASHBOARD ──
+async function renderDashboard(){
+  var kpiDiv=document.getElementById('dash-kpis'); var tablaDiv=document.getElementById('dash-tabla');
+  if(!kpiDiv) return;
+  kpiDiv.innerHTML='<div class="kpi-box" style="grid-column:span 2"><div class="kpi-val" style="font-size:14px">⏳ Cargando...</div></div>';
+  tablaDiv.innerHTML='';
+  try{
+    await waitAuth();
+    var hoy=new Date(); var mesKey=dKey(hoy).slice(0,7);
+    var fSnap=await db.collection('fechas_usadas').get();
+    var diasMes=fSnap.docs.map(function(d){ return d.id; }).filter(function(f){ return f.startsWith(mesKey); });
+    var results=await Promise.all(diasMes.map(function(f){
+      return db.collection('practicas_'+f).get()
+        .then(function(s){ return s.docs.map(function(doc){ return Object.assign({id:doc.id,fecha:f},doc.data()); }); })
+        .catch(function(){ return []; });
+    }));
+    var pracMes=[]; results.forEach(function(arr){ arr.forEach(function(p){ if(p&&p.hora)pracMes.push(p); }); });
+    window._pracMes=pracMes;
+    var total=pracMes.length;
+    var firmadas=pracMes.filter(function(p){ return p.firmada; }).length;
+    var facturado=pracMes.reduce(function(a,p){ return a+calcImporte(p); },0);
+    var horas=pracMes.reduce(function(a,p){ return a+(parseInt(p.duracion)||45)/60; },0);
+    kpiDiv.innerHTML=
+      '<div class="kpi-box"><div class="kpi-val">'+total+'</div><div class="kpi-lbl">Prácticas mes</div></div>'+
+      '<div class="kpi-box green"><div class="kpi-val">'+firmadas+'</div><div class="kpi-lbl">Firmadas</div></div>'+
+      '<div class="kpi-box purple"><div class="kpi-val">'+horas.toFixed(1)+'h</div><div class="kpi-lbl">Horas</div></div>'+
+      '<div class="kpi-box"><div class="kpi-val">'+fmtEur(facturado)+'</div><div class="kpi-lbl">Facturado</div></div>';
+    var pSt={};
+    profesores.forEach(function(p){ pSt[p.id]={nom:p.nombre,pracs:0,firm:0,imp:0,horas:0}; });
+    pracMes.forEach(function(p){
+      if(!pSt[p.profesorId]) return;
+      pSt[p.profesorId].pracs++; if(p.firmada)pSt[p.profesorId].firm++;
+      pSt[p.profesorId].imp+=calcImporte(p); pSt[p.profesorId].horas+=(parseInt(p.duracion)||45)/60;
+    });
+    var rows=Object.values(pSt).filter(function(p){ return p.pracs>0; }).sort(function(a,b){ return b.pracs-a.pracs; });
+    if(rows.length){
+      tablaDiv.innerHTML='<div style="font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:6px">Por profesor</div>'
+        +'<div class="card"><div style="display:grid;grid-template-columns:1fr auto auto auto;padding:7px 12px;background:var(--metal2);font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;gap:6px"><span>Profesor</span><span>Prác.</span><span>Horas</span><span>Fact.</span></div>'
+        +rows.map(function(r,i){
+          return '<div style="display:grid;grid-template-columns:1fr auto auto auto;padding:8px 12px;background:'+(i%2===0?'rgba(255,255,255,.02)':'transparent')+';border-top:1px solid var(--border);font-size:12px;gap:6px;align-items:center">'
+            +'<span style="font-weight:600">'+r.nom+'</span>'
+            +'<span style="color:var(--accent3);font-weight:700;text-align:right">'+r.pracs+'</span>'
+            +'<span style="color:var(--text2);text-align:right">'+r.horas.toFixed(1)+'h</span>'
+            +'<span style="color:var(--green);font-weight:700;text-align:right">'+fmtEur(r.imp)+'</span></div>';
+        }).join('')+'</div>'
+        +'<div style="margin-top:10px"><button class="btn-sm btn-accent" onclick="descargarDashCSV()" style="width:100%;padding:9px">📊 Descargar CSV</button></div>';
+    }
+  }catch(e){ kpiDiv.innerHTML='<div class="kpi-box" style="grid-column:span 2"><div class="kpi-val" style="font-size:13px;color:var(--red)">Error: '+e.message+'</div></div>'; }
+}
+
+function descargarDashCSV(){
+  var datos=window._pracMes||[]; if(!datos.length){ toast('Sin datos — pulsa Actualizar'); return; }
+  var rows=[['Fecha','Hora','Alumno','Profesor','Vehículo','Duración','Firmada','Importe €'].join(',')];
+  datos.forEach(function(p){ rows.push([fmtFecha(p.fecha),p.hora||'',p.alumnoNombre||'',p.profesorNombre||'',p.vehiculo||'coche',(p.duracion||45)+'min',p.firmada?'Sí':'No',calcImporte(p).toFixed(2)].join(',')); });
+  var csv='\uFEFF'+rows.join('\r\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download='Dashboard_'+dKey(new Date())+'.csv'; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); },2000); toast('CSV descargado ✓');
+}
+
+document.getElementById('btn-backup-json').onclick=async function(){
+  toast('⏳ Generando backup...');
+  try{
+    var fSnap=await db.collection('fechas_usadas').get();
+    var fechas=fSnap.docs.map(function(d){ return d.id; });
+    var practicas={};
+    await Promise.all(fechas.map(function(f){
+      return db.collection('practicas_'+f).get()
+        .then(function(s){ practicas[f]=s.docs.map(function(d){ return Object.assign({_id:d.id},d.data()); }); })
+        .catch(function(){});
+    }));
+    var json=JSON.stringify({version:2,fecha:dKey(new Date()),alumnos:alumnos,profesores:profesores,practicas:practicas},null,2);
+    var blob=new Blob([json],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a'); a.href=url; a.download='Diesel_backup_'+dKey(new Date())+'.json'; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(url); },2000); toast('Backup descargado ✓');
+  }catch(e){ toast('Error: '+e.message); }
+};
+
+// ── WHATSAPP ──
+function abrirWA(prac){
+  waPrac=prac; waTipo=1;
+  var al=alumnos.find(function(a){ return a.id===prac.alumnoId; })||{nombre:prac.alumnoNombre||'',telefono:''};
+  var nom=(al.nombre||'').split(' ')[0]; var prof=prac.profesorNombre||'el profesor';
+  document.getElementById('wa-info').textContent='👤 '+(al.nombre||'')+' · '+(al.telefono||'sin teléfono');
+  document.getElementById('wa-prev1').textContent='Hola '+nom+', tienes cita con '+prof+' a las '+prac.hora+'. ¡Te esperamos!';
+  document.getElementById('wa-prev2').textContent='Hola '+nom+', tu hora ha cambiado a las '+prac.hora+'. ¡Hasta pronto!';
+  document.getElementById('wa-tipo1').classList.add('sel'); document.getElementById('wa-tipo2').classList.remove('sel');
+  abrirSheet('sh-wa');
+}
+document.getElementById('wa-tipo1').onclick=function(){ waTipo=1; this.classList.add('sel'); document.getElementById('wa-tipo2').classList.remove('sel'); };
+document.getElementById('wa-tipo2').onclick=function(){ waTipo=2; this.classList.add('sel'); document.getElementById('wa-tipo1').classList.remove('sel'); };
+document.getElementById('btn-enviar-wa').onclick=function(){
+  if(!waPrac) return;
+  var al=alumnos.find(function(a){ return a.id===waPrac.alumnoId; })||{nombre:waPrac.alumnoNombre||'',telefono:''};
+  var nom=(al.nombre||'').split(' ')[0]; var prof=waPrac.profesorNombre||'el profesor';
+  var msg=waTipo===1?'Hola '+nom+', tienes cita con '+prof+' a las '+waPrac.hora+'. ¡Te esperamos!':'Hola '+nom+', tu hora ha cambiado a las '+waPrac.hora+'. ¡Hasta pronto!';
+  var tel=(al.telefono||'').replace(/[^0-9+]/g,'');
+  if(!tel){ toast('Sin teléfono en la ficha'); return; }
+  window.open('https://wa.me/'+tel.replace(/^\+/,'')+'?text='+encodeURIComponent(msg),'_blank');
+  cerrarSheet('sh-wa');
+};
+
+// ── PENDIENTES FIRMA ──
+function abrirPendientesFirma(){ abrirSheet('sh-pendientes'); cargarPendientesFirma(); }
+async function cargarPendientesFirma(){
+  var el=document.getElementById('pend-body');
+  el.innerHTML='<div class="loading"><div class="spinner"></div>Cargando...</div>';
+  try{
+    await waitAuth();
+    var fSnap=await db.collection('fechas_usadas').get();
+    var fechas=fSnap.docs.map(function(d){ return d.id; }).sort(function(a,b){ return b.localeCompare(a); });
+    var results=await Promise.all(fechas.map(function(f){
+      return db.collection('practicas_'+f).where('firmada','==',false).get()
+        .then(function(s){ return s.docs.map(function(d){ return Object.assign({id:d.id,fecha:f},d.data()); }); })
+        .catch(function(){ return []; });
+    }));
+    var pendientes=[];
+    results.forEach(function(r){ r.forEach(function(p){
+      if(rol==='profesor'&&p.profesorId!==profSel) return;
+      pendientes.push(p);
+    }); });
+    pendientes.sort(function(a,b){ return b.fecha.localeCompare(a.fecha)||(a.hora||'').localeCompare(b.hora||''); });
+    if(!pendientes.length){ el.innerHTML='<div style="text-align:center;padding:36px"><div style="font-size:34px">✅</div><p style="color:var(--green);font-weight:700;margin-top:9px">Sin prácticas pendientes</p></div>'; return; }
+    var porFecha={};
+    pendientes.forEach(function(p){ if(!porFecha[p.fecha])porFecha[p.fecha]=[]; porFecha[p.fecha].push(p); });
+    var html='';
+    Object.keys(porFecha).sort(function(a,b){ return b.localeCompare(a); }).forEach(function(fecha){
+      var ps=porFecha[fecha];
+      html+='<div style="background:var(--surface2);padding:6px 11px;font-size:10px;font-weight:700;margin:7px 0 4px;border-radius:var(--r)">📅 '+fmtFecha(fecha)+' · '+ps.length+' pendiente'+(ps.length>1?'s':'')+'</div>';
+      ps.forEach(function(p){
+        var vico=p.vehiculo==='moto'?'🏍️':p.vehiculo==='camion'?'🚛':'🚗';
+        html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:9px 12px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;gap:7px">'
+          +'<div><div style="font-size:12px;font-weight:700;color:var(--accent3)">'+(p.hora||'')+' · '+(p.alumnoNombre||'')+'</div>'
+          +'<div style="font-size:10px;color:var(--text2);margin-top:1px">'+vico+' '+(p.duracion||45)+'min · '+(p.profesorNombre||'—')+'</div></div>'
+          +'<button onclick="cerrarSheet(\'sh-pendientes\');setTimeout(function(){abrirFirma(\''+fecha+'\',\''+p.id+'\',\''+p.alumnoNombre+'\');},200)" style="background:var(--accent);color:#fff;border:none;border-radius:var(--r);padding:7px 11px;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:var(--sans)">✍️ Firmar</button>'
+          +'</div>';
+      });
+    });
+    el.innerHTML=html;
+  }catch(e){ el.innerHTML='<p style="color:var(--red);padding:14px">Error: '+e.message+'</p>'; }
+}
+
+// ── CONFIG ──
+document.getElementById('btn-precios-guardar').onclick=function(){
+  localStorage.setItem(PRECIO_KEY,JSON.stringify({
+    coche:parseFloat(document.getElementById('precio-coche').value)||20,
+    moto:parseFloat(document.getElementById('precio-moto').value)||25,
+    camion:parseFloat(document.getElementById('precio-camion').value)||35
+  })); toast('Precios guardados ✓');
+};
+document.getElementById('btn-wa-guardar').onclick=function(){
+  localStorage.setItem(WA_KEY,JSON.stringify({key:document.getElementById('wa-key').value.trim(),phone:document.getElementById('wa-phone').value.trim()}));
+  toast('WhatsApp guardado ✓');
+};
+async function guardarCred(upd){
+  try{
+    await db.collection('config').doc(CRED_DOC).set(upd,{merge:true});
+    Object.assign(_cred,upd); toast('Guardado ✓');
+  }catch(e){ toast('Error: '+e.message); }
+}
+document.getElementById('btn-pin-admin').onclick=async function(){
+  var nombre=document.getElementById('cfg-admin-nombre').value.trim();
+  var pin=document.getElementById('new-pin-admin').value.trim();
+  if(!nombre&&!pin){ toast('Introduce nombre o PIN'); return; }
+  if(pin&&(pin.length!==4||!/^\d{4}$/.test(pin))){ toast('PIN: 4 dígitos'); return; }
+  var upd={}; if(nombre)upd.adminNombre=nombre; if(pin)upd.adminPin=pin;
+  await guardarCred(upd);
+  document.getElementById('cfg-admin-nombre').value=''; document.getElementById('new-pin-admin').value='';
+};
+document.getElementById('btn-pin-jefe').onclick=async function(){
+  var nombre=document.getElementById('cfg-jefe-nombre').value.trim();
+  var pin=document.getElementById('new-pin-jefe').value.trim();
+  if(!nombre&&!pin){ toast('Introduce nombre o PIN'); return; }
+  if(pin&&(pin.length!==4||!/^\d{4}$/.test(pin))){ toast('PIN: 4 dígitos'); return; }
+  var upd={}; if(nombre)upd.jefeNombre=nombre; if(pin)upd.jefePin=pin;
+  await guardarCred(upd);
+  document.getElementById('cfg-jefe-nombre').value=''; document.getElementById('new-pin-jefe').value='';
+};
+
+// ── INICIO ──
+document.getElementById('fecha-label').textContent=fmtD(currentDate);
+document.getElementById('fecha-prof-label').textContent=fmtD(profDate);
+document.getElementById('fecha-prof-label2').textContent=fmtD(profDate);
+
+// Firestore Rules necesarias:
+// rules_version = '2';
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     match /{document=**} {
+//       allow read, write: if request.auth != null;
+//     }
+//   }
+// }
+
+cargarCredenciales();
+
+// ── Exponer al scope global las funciones llamadas desde HTML inline ──
+window.selRole            = selRole;
+window.selSb              = selSb;
+window.irTab              = irTab;
+window.abrirNuevaPrac     = abrirNuevaPrac;
+window.abrirPendientesFirma = abrirPendientesFirma;
+window.cargarPendientesFirma= cargarPendientesFirma;
+window.renderDashboard    = renderDashboard;
+window.abrirHistorialAl   = abrirHistorialAl;
+window.cerrarSheet        = cerrarSheet;
+window.abrirFirma         = abrirFirma;
+window.descargarDashCSV   = descargarDashCSV;
+
+}); // fin DOMContentLoaded
+</script>
+</body>
+</html>
