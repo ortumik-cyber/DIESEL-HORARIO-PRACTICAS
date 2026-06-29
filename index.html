@@ -257,7 +257,7 @@ html,body{height:100%;font-family:var(--sans);font-size:14px;color:var(--text);b
 <div id="login-screen">
   <div class="login-logo">
     <div class="brand-mark">🚗</div>
-    <h1>DIESEL AUTOESCUELA</h1>
+    <h1 class="autoescuela-nombre">DIESEL AUTOESCUELA</h1>
     <p>Sistema de gestión · v8.1</p>
   </div>
   <div class="login-card">
@@ -644,6 +644,8 @@ html,body{height:100%;font-family:var(--sans);font-size:14px;color:var(--text);b
   </div>
 </div>
 
+<!-- SheetJS para Excel -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <!-- MSAL para OneDrive -->
 <script src="https://alcdn.msauth.net/browser/2.32.0/js/msal-browser.min.js"></script>
 <!-- Firebase SDKs + lógica arrancan cuando el DOM está listo -->
@@ -654,7 +656,80 @@ html,body{height:100%;font-family:var(--sans);font-size:14px;color:var(--text);b
 <script>
 // Los SDKs son síncronos — ya están definidos aquí.
 // DOMContentLoaded garantiza que todos los elementos HTML existen.
-document.addEventListener('DOMContentLoaded', function(){
+document.addEventListener('DOMContentLoaded', async function(){
+
+// ══════════════════════════════════════════════════════════════
+// VERIFICACIÓN DE LICENCIA
+// ══════════════════════════════════════════════════════════════
+var LICENCIA_SERVER = 'https://diesel-licencias.onrender.com';
+var _licToken = null;
+var _licData  = null;
+
+function getLicencia(){ return localStorage.getItem('diesel_lic_code')||''; }
+
+async function verificarLicencia(){
+  var codigo = getLicencia();
+  if(!codigo){ mostrarPantallaLicencia('sin-codigo'); return false; }
+  try{
+    var dominio = window.location.hostname+window.location.pathname.replace(/\/$/,'');
+    var resp = await fetch(LICENCIA_SERVER+'/verificar',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({licencia:codigo, dominio:dominio})
+    });
+    if(!resp.ok){
+      var err = await resp.json().catch(function(){return{};});
+      mostrarPantallaLicencia('error', err.detail||'Licencia no válida');
+      return false;
+    }
+    var data = await resp.json();
+    _licToken=data.token; _licData=data;
+    if(data.autoescuela_nombre){
+      document.querySelectorAll('.autoescuela-nombre').forEach(function(el){ el.textContent=data.autoescuela_nombre; });
+    }
+    localStorage.setItem('diesel_lic_token', data.token);
+    localStorage.setItem('diesel_lic_token_time', Date.now().toString());
+    return true;
+  }catch(e){
+    var cached=localStorage.getItem('diesel_lic_token');
+    var cachedTime=parseInt(localStorage.getItem('diesel_lic_token_time')||'0');
+    if(cached && Date.now()-cachedTime < 24*60*60*1000){ _licToken=cached; return true; }
+    mostrarPantallaLicencia('sin-conexion');
+    return false;
+  }
+}
+
+function mostrarPantallaLicencia(tipo, msg){
+  var msgs={'sin-codigo':{ico:'🔑',t:'Licencia requerida',txt:'Introduce el código de licencia para usar DIESEL AUTOESCUELA.'},
+    'error':{ico:'🚫',t:'Licencia no válida',txt:msg||'Código no válido o caducado.'},
+    'sin-conexion':{ico:'📡',t:'Sin conexión',txt:'No se puede verificar la licencia. Comprueba tu conexión.'}};
+  var m=msgs[tipo]||msgs['error'];
+  var el=document.getElementById('licencia-screen');
+  if(!el){el=document.createElement('div');el.id='licencia-screen';
+    el.style.cssText='position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:300;padding:24px;flex-direction:column';
+    document.body.appendChild(el);}
+  el.innerHTML='<div style="text-align:center;max-width:360px">'
+    +'<div style="font-size:48px;margin-bottom:12px">'+m.ico+'</div>'
+    +'<h2 style="font-size:18px;font-weight:800;margin-bottom:8px;color:var(--text)">'+m.t+'</h2>'
+    +'<p style="font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.6">'+m.txt+'</p>'
+    +'<input type="text" id="lic-input" placeholder="DIESEL-XXXX-XXXX-XXXX" style="width:100%;padding:10px 14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:14px;text-align:center;margin-bottom:10px">'
+    +'<button onclick="aplicarLicencia()" style="width:100%;padding:11px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans)">Activar licencia</button>'
+    +'<p style="font-size:11px;color:var(--text3);margin-top:12px">¿Sin licencia? Contacta con Diesel Autoescuela.</p>'
+    +'</div>';
+  el.style.display='flex';
+}
+
+window.aplicarLicencia = async function(){
+  var inp=document.getElementById('lic-input');
+  var codigo=(inp?inp.value:'').trim().toUpperCase();
+  if(!codigo) return;
+  localStorage.setItem('diesel_lic_code', codigo);
+  var ok=await verificarLicencia();
+  if(ok){
+    var el=document.getElementById('licencia-screen');
+    if(el)el.style.display='none';
+    arrancarApp();
+  }
+};
 
 // ── FIREBASE — proyecto diesel-horario ──
 var _app = firebase.apps.length ? firebase.apps[0] : firebase.initializeApp({
@@ -1444,11 +1519,12 @@ async function renderDashboard(){
     var total=pracMes.length;
     var firmadas=pracMes.filter(function(p){ return p.firmada; }).length;
     var facturado=pracMes.reduce(function(a,p){ return a+calcImporte(p); },0);
-    var horas=pracMes.reduce(function(a,p){ return a+(parseInt(p.duracion)||45)/60; },0);
+    var horasTotal=pracMes.reduce(function(a,p){ return a+(parseInt(p.duracion)||45)/60; },0);
+    function fmtHoras(h){ return Math.floor(h)+'h '+p2(Math.round((h%1)*60))+'min'; }
     kpiDiv.innerHTML=
       '<div class="kpi-box"><div class="kpi-val">'+total+'</div><div class="kpi-lbl">Prácticas mes</div></div>'+
       '<div class="kpi-box green"><div class="kpi-val">'+firmadas+'</div><div class="kpi-lbl">Firmadas</div></div>'+
-      '<div class="kpi-box purple"><div class="kpi-val">'+horas.toFixed(1)+'h</div><div class="kpi-lbl">Horas</div></div>'+
+      '<div class="kpi-box purple"><div class="kpi-val">'+fmtHoras(horasTotal)+'</div><div class="kpi-lbl">Horas</div></div>'+
       '<div class="kpi-box"><div class="kpi-val">'+fmtEur(facturado)+'</div><div class="kpi-lbl">Facturado</div></div>';
     var pSt={};
     profesores.forEach(function(p){ pSt[p.id]={nom:p.nombre,pracs:0,firm:0,imp:0,horas:0}; });
@@ -1465,24 +1541,90 @@ async function renderDashboard(){
           return '<div style="display:grid;grid-template-columns:1fr auto auto auto;padding:8px 12px;background:'+(i%2===0?'rgba(255,255,255,.02)':'transparent')+';border-top:1px solid var(--border);font-size:12px;gap:6px;align-items:center">'
             +'<span style="font-weight:600">'+r.nom+'</span>'
             +'<span style="color:var(--accent3);font-weight:700;text-align:right">'+r.pracs+'</span>'
-            +'<span style="color:var(--text2);text-align:right">'+r.horas.toFixed(1)+'h</span>'
+            +'<span style="color:var(--text2);text-align:right">'+Math.floor(r.horas)+'h '+p2(Math.round((r.horas%1)*60))+'min</span>'
             +'<span style="color:var(--green);font-weight:700;text-align:right">'+fmtEur(r.imp)+'</span></div>';
         }).join('')+'</div>'
-        +'<div style="margin-top:10px"><button class="btn-sm btn-accent" onclick="descargarDashCSV()" style="width:100%;padding:9px">📊 Descargar CSV</button></div>';
+        +'<div style="margin-top:10px"><button class="btn-sm btn-accent" onclick="descargarDashXLSX()" style="width:100%;padding:9px">📊 Descargar Excel</button></div>';
     }
   }catch(e){ kpiDiv.innerHTML='<div class="kpi-box" style="grid-column:span 2"><div class="kpi-val" style="font-size:13px;color:var(--red)">Error: '+e.message+'</div></div>'; }
 }
 
-function descargarDashCSV(){
-  var datos=window._pracMes||[]; if(!datos.length){ toast('Sin datos — pulsa Actualizar'); return; }
-  var rows=[['Fecha','Hora','Alumno','Profesor','Vehículo','Duración','Firmada','Importe €'].join(',')];
-  datos.forEach(function(p){ rows.push([fmtFecha(p.fecha),p.hora||'',p.alumnoNombre||'',p.profesorNombre||'',p.vehiculo||'coche',(p.duracion||45)+'min',p.firmada?'Sí':'No',calcImporte(p).toFixed(2)].join(',')); });
-  var csv='\uFEFF'+rows.join('\r\n');
-  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var a=document.createElement('a'); a.href=url; a.download='Dashboard_'+dKey(new Date())+'.csv'; a.click();
-  setTimeout(function(){ URL.revokeObjectURL(url); },2000); toast('CSV descargado ✓');
+function descargarDashXLSX(){
+  var datos=window._pracMes||[];
+  if(!datos.length){ toast('Sin datos — pulsa Actualizar'); return; }
+  if(!window.XLSX){ toast('Cargando librería Excel...'); return; }
+
+  var wb = XLSX.utils.book_new();
+
+  // ── Hoja 1: Prácticas detalle ──
+  var fmtH = function(h){ return Math.floor(h)+'h '+p2(Math.round((h%1)*60))+'min'; };
+  var rows1 = [['Fecha','Día','Hora','Alumno','Profesor','Vehículo','Duración','Firmada','Hora firma','Importe €']];
+  datos.forEach(function(p){
+    var d=new Date((p.fecha||'').replace(/-/g,'/'));
+    rows1.push([
+      fmtFecha(p.fecha),
+      DIAS[d.getDay()]||'',
+      p.hora||'',
+      p.alumnoNombre||'',
+      p.profesorNombre||'',
+      (p.vehiculo||'coche').charAt(0).toUpperCase()+(p.vehiculo||'coche').slice(1),
+      (p.duracion||45)+'min',
+      p.firmada?'Sí':'No',
+      p.firmaTimestamp||'',
+      calcImporte(p)
+    ]);
+  });
+  var ws1 = XLSX.utils.aoa_to_sheet(rows1);
+  ws1['!cols'] = [{wch:18},{wch:10},{wch:8},{wch:22},{wch:16},{wch:10},{wch:9},{wch:8},{wch:10},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Prácticas');
+
+  // ── Hoja 2: Resumen por profesor ──
+  var pSt2={};
+  profesores.forEach(function(p){ pSt2[p.id]={nombre:p.nombre,pracs:0,firm:0,pend:0,mins:0,imp:0}; });
+  datos.forEach(function(p){
+    if(!pSt2[p.profesorId]) pSt2[p.profesorId]={nombre:p.profesorNombre||'Sin asignar',pracs:0,firm:0,pend:0,mins:0,imp:0};
+    pSt2[p.profesorId].pracs++;
+    if(p.firmada) pSt2[p.profesorId].firm++; else pSt2[p.profesorId].pend++;
+    pSt2[p.profesorId].mins+=(parseInt(p.duracion)||45);
+    pSt2[p.profesorId].imp+=calcImporte(p);
+  });
+  var rows2=[['Profesor','Prácticas','Firmadas','Pendientes','Horas','Facturado €']];
+  Object.values(pSt2).filter(function(r){return r.pracs>0;}).sort(function(a,b){return b.pracs-a.pracs;}).forEach(function(r){
+    rows2.push([r.nombre, r.pracs, r.firm, r.pend, fmtH(r.mins/60), r.imp]);
+  });
+  // Totales
+  var totPracs=datos.length, totFirm=datos.filter(function(p){return p.firmada;}).length;
+  var totMins=datos.reduce(function(a,p){return a+(parseInt(p.duracion)||45);},0);
+  var totImp=datos.reduce(function(a,p){return a+calcImporte(p);},0);
+  rows2.push(['TOTAL', totPracs, totFirm, totPracs-totFirm, fmtH(totMins/60), totImp]);
+  var ws2 = XLSX.utils.aoa_to_sheet(rows2);
+  ws2['!cols'] = [{wch:18},{wch:10},{wch:10},{wch:10},{wch:10},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Por Profesor');
+
+  // ── Hoja 3: Por alumno ──
+  var alSt={};
+  datos.forEach(function(p){
+    if(!alSt[p.alumnoId]) alSt[p.alumnoId]={nombre:p.alumnoNombre||'',pracs:0,firm:0,mins:0,imp:0};
+    alSt[p.alumnoId].pracs++;
+    if(p.firmada) alSt[p.alumnoId].firm++;
+    alSt[p.alumnoId].mins+=(parseInt(p.duracion)||45);
+    alSt[p.alumnoId].imp+=calcImporte(p);
+  });
+  var rows3=[['Alumno','Prácticas','Firmadas','Horas','Facturado €']];
+  Object.values(alSt).sort(function(a,b){return b.pracs-a.pracs;}).forEach(function(r){
+    rows3.push([r.nombre, r.pracs, r.firm, fmtH(r.mins/60), r.imp]);
+  });
+  var ws3 = XLSX.utils.aoa_to_sheet(rows3);
+  ws3['!cols'] = [{wch:22},{wch:10},{wch:10},{wch:10},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Por Alumno');
+
+  // Descargar
+  var mes = dKey(new Date()).slice(0,7);
+  XLSX.writeFile(wb, 'Dashboard_'+mes+'.xlsx');
+  toast('✅ Excel descargado');
 }
+// Alias para el botón HTML
+window.descargarDashCSV = descargarDashXLSX;
 
 document.getElementById('btn-backup-json').onclick=async function(){
   toast('⏳ Generando backup...');
@@ -1605,9 +1747,13 @@ document.getElementById('btn-pin-jefe').onclick=async function(){
 };
 
 // ── INICIO ──
-document.getElementById('fecha-label').textContent=fmtD(currentDate);
-document.getElementById('fecha-prof-label').textContent=fmtD(profDate);
-document.getElementById('fecha-prof-label2').textContent=fmtD(profDate);
+function arrancarApp(){
+  document.getElementById('fecha-label').textContent=fmtD(currentDate);
+  document.getElementById('fecha-prof-label').textContent=fmtD(profDate);
+  document.getElementById('fecha-prof-label2').textContent=fmtD(profDate);
+  cargarCredenciales();
+  setTimeout(async function(){ await initOD(false); },2000);
+}
 
 // Firestore Rules necesarias:
 // rules_version = '2';
@@ -1619,7 +1765,8 @@ document.getElementById('fecha-prof-label2').textContent=fmtD(profDate);
 //   }
 // }
 
-cargarCredenciales();
+// Licencias desactivadas temporalmente — arrancar directo
+arrancarApp();
 
 // ── BACKUP AUTOMÁTICO CADA 2 HORAS ──
 var _backupTimer = null;
@@ -1629,43 +1776,98 @@ var OD_KEY = 'dh_od';
 
 function getODConf(){ try{ return JSON.parse(localStorage.getItem(OD_KEY)||'{}'); }catch(e){ return {}; } }
 
-async function initOD(){
-  if(OD_TOKEN) return true;
-  if(!window.msal) return false;
-  var conf = getODConf();
-  var clientId = conf.clientId || AZURE_CLIENT_ID;
-  try{
-    var app = new msal.PublicClientApplication({
-      auth:{clientId:clientId, authority:'https://login.microsoftonline.com/common', redirectUri:'https://ortumik-cyber.github.io/DIESEL-HORARIO-PRACTICAS/'},
-      cache:{cacheLocation:'localStorage', storeAuthStateInCookie:false}
-    });
-    // Intentar token silencioso primero
-    var accounts = app.getAllAccounts();
-    var tokenResp;
-    if(accounts.length>0){
-      tokenResp = await app.acquireTokenSilent({scopes:['Files.ReadWrite'], account:accounts[0]}).catch(function(){return null;});
-    }
-    if(!tokenResp){
-      tokenResp = await app.acquireTokenPopup({scopes:['Files.ReadWrite']});
-    }
-    OD_TOKEN = tokenResp.accessToken;
-    localStorage.setItem(OD_KEY, JSON.stringify({clientId:clientId, account:accounts[0]?accounts[0].username:''}));
-    return true;
-  }catch(e){ console.warn('OD init error:', e.message); return false; }
+var _msalApp = null;
+
+// Scopes correctos con prefijo Microsoft Graph
+var OD_SCOPES = ['https://graph.microsoft.com/Files.ReadWrite', 'https://graph.microsoft.com/User.Read'];
+
+function actualizarEstadoOD(conectado, cuenta){
+  var el = document.getElementById('od-status');
+  if(!el) return;
+  if(conectado){
+    el.textContent = '✅ OneDrive conectado · '+(cuenta||'');
+    el.style.background = 'rgba(63,185,80,.1)';
+    el.style.color = 'var(--green)';
+  }else{
+    el.textContent = '⚪ OneDrive no conectado';
+    el.style.background = '';
+    el.style.color = '';
+  }
 }
 
+async function getMSALApp(){
+  if(_msalApp) return _msalApp;
+  if(!window.msal) return null;
+  var conf = getODConf();
+  var clientId = conf.clientId || AZURE_CLIENT_ID;
+  _msalApp = new msal.PublicClientApplication({
+    auth:{
+      clientId: clientId,
+      authority: 'https://login.microsoftonline.com/common',
+      redirectUri: 'https://ortumik-cyber.github.io/DIESEL-HORARIO-PRACTICAS/'
+    },
+    cache:{cacheLocation:'localStorage', storeAuthStateInCookie:false}
+  });
+  // handleRedirectPromise OBLIGATORIO en SPA — procesa el token del redirect
+  await _msalApp.handleRedirectPromise().catch(function(){});
+  return _msalApp;
+}
+
+async function initOD(popup){
+  if(OD_TOKEN) return true;
+  var app = await getMSALApp();
+  if(!app) return false;
+  try{
+    var accounts = app.getAllAccounts();
+    var tokenResp = null;
+    // Intentar silencioso si hay cuenta cacheada
+    if(accounts.length>0){
+      tokenResp = await app.acquireTokenSilent({scopes:OD_SCOPES, account:accounts[0]}).catch(function(){return null;});
+    }
+    // Popup si no hay token silencioso y se permitió
+    if(!tokenResp && popup){
+      // loginPopup combina login + consentimiento de scopes en un paso
+      var loginResp = await app.loginPopup({scopes:OD_SCOPES});
+      tokenResp = await app.acquireTokenSilent({scopes:OD_SCOPES, account:loginResp.account}).catch(function(){return null;});
+      if(!tokenResp) tokenResp = await app.acquireTokenPopup({scopes:OD_SCOPES, account:loginResp.account});
+    }
+    if(!tokenResp) return false;
+    OD_TOKEN = tokenResp.accessToken;
+    var cuenta = tokenResp.account ? tokenResp.account.username : '';
+    localStorage.setItem(OD_KEY, JSON.stringify({clientId:getODConf().clientId||AZURE_CLIENT_ID, cuenta:cuenta}));
+    actualizarEstadoOD(true, cuenta);
+    return true;
+  }catch(e){
+    console.warn('OD error:', e.code||e.message);
+    actualizarEstadoOD(false);
+    return false;
+  }
+}
+
+
 async function subirBackupOD(json, filename){
-  if(!OD_TOKEN) return false;
+  if(!OD_TOKEN){
+    // Intentar reconexión silenciosa
+    var ok = await initOD(false);
+    if(!ok) return false;
+  }
   var year = new Date().getFullYear();
   var path = 'DIESEL/DIESEL%20BACKUP/'+year+'/'+encodeURIComponent(filename);
   try{
     var resp = await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/'+path+':/content?@microsoft.graph.conflictBehavior=replace',{
       method:'PUT',
-      headers:{'Authorization':'Bearer '+OD_TOKEN, 'Content-Type':'application/json'},
+      headers:{'Authorization':'Bearer '+OD_TOKEN, 'Content-Type':'application/octet-stream'},
       body:json
     });
+    if(resp.status===401){
+      // Token expirado — reintentar con nuevo token
+      OD_TOKEN=null; var ok2=await initOD(false); if(!ok2) return false;
+      resp = await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/'+path+':/content?@microsoft.graph.conflictBehavior=replace',{
+        method:'PUT', headers:{'Authorization':'Bearer '+OD_TOKEN,'Content-Type':'application/octet-stream'}, body:json
+      });
+    }
     return resp.ok;
-  }catch(e){ return false; }
+  }catch(e){ console.warn('subirOD error:',e.message); return false; }
 }
 
 async function generarBackupJSON(){
@@ -1680,18 +1882,107 @@ async function generarBackupJSON(){
   return JSON.stringify({version:2, fecha:new Date().toISOString(), alumnos:alumnos, profesores:profesores, practicas:practicas}, null, 2);
 }
 
+async function generarBackupXLSX(){
+  if(!window.XLSX){ toast('Librería Excel no cargada'); return null; }
+  // Recoger todas las prácticas
+  var fSnap = await db.collection('fechas_usadas').get();
+  var fechas = fSnap.docs.map(function(d){ return d.id; }).sort();
+  var todasPrac = [];
+  await Promise.all(fechas.map(function(f){
+    return db.collection('practicas_'+f).get()
+      .then(function(s){ s.docs.forEach(function(d){ todasPrac.push(Object.assign({_id:d.id,fecha:f},d.data())); }); })
+      .catch(function(){});
+  }));
+  todasPrac.sort(function(a,b){ return (a.fecha+a.hora).localeCompare(b.fecha+b.hora); });
+
+  var wb = XLSX.utils.book_new();
+  function fmtH(h){ return Math.floor(h)+'h '+p2(Math.round((h%1)*60))+'min'; }
+
+  // ── Hoja 1: Todas las prácticas con firma ──
+  var rows1 = [['Fecha','Día','Hora','Alumno','Teléfono','Carnet','Profesor','Vehículo','Duración','Firmada','Hora firma','Importe €','Firma (base64)']];
+  todasPrac.forEach(function(p){
+    var al = alumnos.find(function(a){ return a.id===p.alumnoId; })||{};
+    var d  = new Date((p.fecha||'').replace(/-/g,'/'));
+    rows1.push([
+      fmtFecha(p.fecha), DIAS[d.getDay()]||'', p.hora||'',
+      p.alumnoNombre||'', al.telefono||'', al.carnet||'',
+      p.profesorNombre||'',
+      (p.vehiculo||'coche').charAt(0).toUpperCase()+(p.vehiculo||'coche').slice(1),
+      (p.duracion||45)+'min',
+      p.firmada?'Sí':'No', p.firmaTimestamp||'',
+      calcImporte(p),
+      p.firmaBase64||'' // firma completa en base64
+    ]);
+  });
+  var ws1 = XLSX.utils.aoa_to_sheet(rows1);
+  ws1['!cols'] = [{wch:18},{wch:10},{wch:7},{wch:22},{wch:14},{wch:7},{wch:16},{wch:9},{wch:8},{wch:8},{wch:10},{wch:10},{wch:20}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Prácticas');
+
+  // ── Hoja 2: Por alumno ──
+  var alSt={};
+  todasPrac.forEach(function(p){
+    if(!alSt[p.alumnoId]) alSt[p.alumnoId]={nombre:p.alumnoNombre||'',pracs:0,firm:0,mins:0,imp:0,ultimaFecha:''};
+    alSt[p.alumnoId].pracs++;
+    if(p.firmada) alSt[p.alumnoId].firm++;
+    alSt[p.alumnoId].mins+=(parseInt(p.duracion)||45);
+    alSt[p.alumnoId].imp+=calcImporte(p);
+    if(p.fecha>alSt[p.alumnoId].ultimaFecha) alSt[p.alumnoId].ultimaFecha=p.fecha;
+  });
+  var rows2=[['Alumno','Total prácticas','Firmadas','Pendientes','Horas totales','Facturado €','Última práctica']];
+  Object.values(alSt).sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');}).forEach(function(r){
+    rows2.push([r.nombre,r.pracs,r.firm,r.pracs-r.firm,fmtH(r.mins/60),r.imp,fmtFecha(r.ultimaFecha)]);
+  });
+  var ws2=XLSX.utils.aoa_to_sheet(rows2);
+  ws2['!cols']=[{wch:22},{wch:14},{wch:10},{wch:10},{wch:12},{wch:12},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Por Alumno');
+
+  // ── Hoja 3: Por profesor ──
+  var prSt={};
+  todasPrac.forEach(function(p){
+    if(!prSt[p.profesorId]) prSt[p.profesorId]={nombre:p.profesorNombre||'Sin asignar',pracs:0,firm:0,mins:0,imp:0};
+    prSt[p.profesorId].pracs++;
+    if(p.firmada) prSt[p.profesorId].firm++;
+    prSt[p.profesorId].mins+=(parseInt(p.duracion)||45);
+    prSt[p.profesorId].imp+=calcImporte(p);
+  });
+  var rows3=[['Profesor','Prácticas','Firmadas','Pendientes','Horas','Facturado €']];
+  Object.values(prSt).sort(function(a,b){return b.pracs-a.pracs;}).forEach(function(r){
+    rows3.push([r.nombre,r.pracs,r.firm,r.pracs-r.firm,fmtH(r.mins/60),r.imp]);
+  });
+  var totMins=todasPrac.reduce(function(a,p){return a+(parseInt(p.duracion)||45);},0);
+  var totImp=todasPrac.reduce(function(a,p){return a+calcImporte(p);},0);
+  var totFirm=todasPrac.filter(function(p){return p.firmada;}).length;
+  rows3.push(['TOTAL GENERAL',todasPrac.length,totFirm,todasPrac.length-totFirm,fmtH(totMins/60),totImp]);
+  var ws3=XLSX.utils.aoa_to_sheet(rows3);
+  ws3['!cols']=[{wch:18},{wch:10},{wch:10},{wch:10},{wch:10},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws3, 'Por Profesor');
+
+  // ── Hoja 4: Alumnos ──
+  var rows4=[['Nombre','Teléfono','Carnet','Alta','Notas']];
+  alumnos.slice().sort(function(a,b){return (a.nombre||'').localeCompare(b.nombre||'');}).forEach(function(a){
+    rows4.push([a.nombre||'',a.telefono||'',a.carnet||'',a.createdAt?new Date(a.createdAt).toLocaleDateString('es-ES'):'',a.notas||'']);
+  });
+  var ws4=XLSX.utils.aoa_to_sheet(rows4);
+  ws4['!cols']=[{wch:22},{wch:14},{wch:8},{wch:12},{wch:40}];
+  XLSX.utils.book_append_sheet(wb, ws4, 'Alumnos');
+
+  return wb;
+}
+
 async function hacerBackupAutomatico(){
-  // Solo si hay usuario logueado
   if(!rol) return;
   try{
-    var json = await generarBackupJSON();
-    // Backup local siempre (localStorage)
-    localStorage.setItem('dh_last_backup', JSON.stringify({fecha:new Date().toISOString(), size:json.length}));
-    // Backup OneDrive si hay token
+    var wb = await generarBackupXLSX();
+    if(!wb) return;
+    var fecha = new Date().toISOString().slice(0,16).replace('T','_').replace(':','');
+    var filename = 'Diesel_auto_'+fecha+'.xlsx';
+    localStorage.setItem('dh_last_backup', JSON.stringify({fecha:new Date().toISOString(), archivo:filename}));
     if(OD_TOKEN){
-      var filename = 'Diesel_auto_'+new Date().toISOString().slice(0,16).replace('T','_').replace(':','')+'.json';
-      var ok = await subirBackupOD(json, filename);
+      var wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+      var blob = new Blob([wbout], {type:'application/octet-stream'});
+      var ok = await subirBackupOD(blob, filename);
       if(ok) toast('☁️ Backup automático OneDrive ✓');
+      else console.warn('Backup OD falló');
     }
     console.log('Backup automático completado:', new Date().toLocaleTimeString());
   }catch(e){ console.warn('Backup error:', e.message); }
@@ -1708,30 +1999,31 @@ function iniciarBackupAutomatico(){
 window.conectarOD = async function(){
   var btn = document.getElementById('btn-conectar-od');
   if(btn){ btn.textContent='Conectando...'; btn.disabled=true; }
-  var ok = await initOD();
+  var ok = await initOD(true); // true = permitir popup
   if(btn){ btn.textContent='Conectar OneDrive'; btn.disabled=false; }
   if(ok){ toast('✅ OneDrive conectado'); }
-  else{ toast('❌ Error conectando OneDrive'); }
+  else{ toast('❌ Error — verifica que no se bloqueó el popup'); }
 };
 window.hacerBackupManual = async function(){
-  toast('⏳ Generando backup...');
+  toast('⏳ Generando backup Excel...');
   try{
-    var json = await generarBackupJSON();
+    var wb = await generarBackupXLSX();
+    if(!wb){ return; }
+    var fecha = new Date().toISOString().slice(0,10);
+    var filename = 'Diesel_backup_'+fecha+'.xlsx';
     // Descargar local
-    var blob = new Blob([json],{type:'application/json'});
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a'); a.href=url;
-    a.download='Diesel_backup_'+new Date().toISOString().slice(0,10)+'.json'; a.click();
-    setTimeout(function(){ URL.revokeObjectURL(url); },2000);
+    XLSX.writeFile(wb, filename);
     // OneDrive si disponible
     if(OD_TOKEN){
-      var fn='Diesel_manual_'+new Date().toISOString().slice(0,10)+'.json';
-      await subirBackupOD(json,fn);
-      toast('✅ Backup descargado y subido a OneDrive');
+      var wbout = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+      var blob = new Blob([wbout], {type:'application/octet-stream'});
+      var json = blob; // reutilizar función subirBackupOD con Blob
+      var ok = await subirBackupOD(blob, filename);
+      toast(ok ? '✅ Backup Excel descargado y subido a OneDrive' : '✅ Backup Excel descargado (OneDrive falló)');
     }else{
-      toast('✅ Backup descargado');
+      toast('✅ Backup Excel descargado · Conecta OneDrive para copia automática');
     }
-  }catch(e){ toast('Error: '+e.message); }
+  }catch(e){ toast('Error backup: '+e.message); }
 };
 
 // ── Exponer al scope global las funciones llamadas desde HTML inline ──
