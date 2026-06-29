@@ -441,7 +441,11 @@ html,body{height:100%;font-family:var(--sans);font-size:14px;color:var(--text);b
               <button class="btn-sec" style="flex:0 0 auto;padding:10px 14px" onclick="desconectarOD()">✕</button>
             </div>
             <button class="btn-prim" style="width:100%;background:var(--green2);margin-bottom:8px" onclick="hacerBackupManual()">💾 Backup manual ahora</button>
-            <p style="font-size:10px;color:var(--text3);text-align:center">Backup automático cada 2 horas · Pulsa ✕ para cambiar de cuenta</p>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn-sec" style="flex:1" onclick="document.getElementById('import-backup-file').click()">📥 Importar backup</button>
+              <input type="file" id="import-backup-file" accept=".json,.xlsx" style="display:none" onchange="importarBackup(this)">
+            </div>
+            <p style="font-size:10px;color:var(--text3);text-align:center;margin-top:6px">Backup automático cada 2 horas · Pulsa ✕ para cambiar de cuenta</p>
           </div>
         </div>
         <div class="cfg-sec">
@@ -1818,23 +1822,28 @@ async function getMSALApp(){
   return _msalApp;
 }
 
-async function initOD(popup){
-  if(OD_TOKEN) return true;
+async function initOD(popup, forzarLogin){
+  if(OD_TOKEN && !forzarLogin) return true;
   var app = await getMSALApp();
   if(!app) return false;
   try{
     var accounts = app.getAllAccounts();
     var tokenResp = null;
-    // Intentar silencioso si hay cuenta cacheada
-    if(accounts.length>0){
-      tokenResp = await app.acquireTokenSilent({scopes:OD_SCOPES, account:accounts[0]}).catch(function(){return null;});
-    }
-    // Popup si no hay token silencioso y se permitió
-    if(!tokenResp && popup){
-      // loginPopup combina login + consentimiento de scopes en un paso
-      var loginResp = await app.loginPopup({scopes:OD_SCOPES});
+    // Si forzamos login (cambio de cuenta) — siempre popup sin cuenta previa
+    if(forzarLogin || accounts.length===0){
+      if(!popup) return false;
+      var loginResp = await app.loginPopup({
+        scopes: OD_SCOPES,
+        prompt: 'select_account' // Muestra selector de cuenta siempre
+      });
       tokenResp = await app.acquireTokenSilent({scopes:OD_SCOPES, account:loginResp.account}).catch(function(){return null;});
       if(!tokenResp) tokenResp = await app.acquireTokenPopup({scopes:OD_SCOPES, account:loginResp.account});
+    }else{
+      // Intentar silencioso con cuenta existente
+      tokenResp = await app.acquireTokenSilent({scopes:OD_SCOPES, account:accounts[0]}).catch(function(){return null;});
+      if(!tokenResp && popup){
+        tokenResp = await app.acquireTokenPopup({scopes:OD_SCOPES, account:accounts[0]});
+      }
     }
     if(!tokenResp) return false;
     OD_TOKEN = tokenResp.accessToken;
@@ -2006,14 +2015,17 @@ function iniciarBackupAutomatico(){
 window.conectarOD = async function(){
   var btn = document.getElementById('btn-conectar-od');
   if(btn){ btn.textContent='Conectando...'; btn.disabled=true; }
-  // Limpiar sesión anterior para forzar login con cuenta del cliente
-  OD_TOKEN = null;
-  _msalApp = null;
-  // Borrar cache MSAL del localStorage
-  Object.keys(localStorage).forEach(function(k){
-    if(k.indexOf('msal.')=== 0 || k.indexOf('login.')=== 0) localStorage.removeItem(k);
+  // Limpiar todo — localStorage y sessionStorage
+  OD_TOKEN = null; _msalApp = null;
+  ['localStorage','sessionStorage'].forEach(function(store){
+    var s = window[store];
+    Object.keys(s).forEach(function(k){
+      if(k.indexOf('msal.')===0||k.indexOf('login.')===0) s.removeItem(k);
+    });
   });
-  var ok = await initOD(true);
+  localStorage.removeItem(OD_KEY);
+  // forzarLogin=true → siempre muestra selector de cuenta Microsoft
+  var ok = await initOD(true, true);
   if(btn){ btn.textContent='Conectar OneDrive'; btn.disabled=false; }
   if(ok){
     var conf = getODConf();
@@ -2053,7 +2065,97 @@ window.hacerBackupManual = async function(){
   }catch(e){ toast('Error backup: '+e.message); }
 };
 
+// ── IMPORTAR BACKUP ──────────────────────────────────────────────
+window.importarBackup = async function(input){
+  var file = input.files[0]; if(!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  toast('⏳ Importando backup...');
+  try{
+    if(ext==='json'){
+      var text = await file.text();
+      var data = JSON.parse(text);
+      await restaurarDesdeJSON(data);
+    }else if(ext==='xlsx'){
+      var ab = await file.arrayBuffer();
+      var wb = XLSX.read(ab, {type:'array'});
+      var data = xlsxAJSON(wb);
+      await restaurarDesdeJSON(data);
+    }else{
+      toast('Formato no soportado — usa .json o .xlsx'); return;
+    }
+  }catch(e){ toast('Error al importar: '+e.message); }
+  input.value='';
+};
+
+function xlsxAJSON(wb){
+  // Convertir Excel backup a estructura JSON
+  var data = {alumnos:[], profesores:[], practicas:{}};
+  // Hoja Alumnos
+  if(wb.SheetNames.indexOf('Alumnos')>=0){
+    var rows = XLSX.utils.sheet_to_json(wb.Sheets['Alumnos']);
+    data.alumnos = rows.map(function(r){ return {nombre:r['Nombre']||'',telefono:r['Teléfono']||'',carnet:r['Carnet']||'B',notas:r['Notas']||''}; });
+  }
+  // Hoja Prácticas
+  if(wb.SheetNames.indexOf('Prácticas')>=0){
+    var rows2 = XLSX.utils.sheet_to_json(wb.Sheets['Prácticas']);
+    rows2.forEach(function(r){
+      // Intentar reconstruir fecha desde columna Fecha
+      var fecha = r['_fecha']||'';
+      if(!fecha) return;
+      if(!data.practicas[fecha]) data.practicas[fecha]=[];
+      data.practicas[fecha].push({
+        hora:r['Hora']||'',duracion:parseInt(r['Duración'])||45,
+        alumnoNombre:r['Alumno']||'',profesorNombre:r['Profesor']||'',
+        vehiculo:(r['Vehículo']||'coche').toLowerCase(),
+        firmada:r['Firmada']==='Sí'||r['Firmada']===true,
+        firmaTimestamp:r['Hora firma']||'',
+        firmaBase64:r['Firma (base64)']||''
+      });
+    });
+  }
+  return data;
+}
+
+async function restaurarDesdeJSON(data){
+  if(!confirm('⚠️ ATENCIÓN: Esto sobrescribirá los datos actuales.
+
+¿Estás seguro de que quieres restaurar este backup?')) return;
+  await waitAuth(); sync('syncing');
+  var errores=0, ok=0;
+  // Restaurar alumnos
+  if(data.alumnos&&data.alumnos.length){
+    for(var i=0;i<data.alumnos.length;i++){
+      var al=data.alumnos[i]; if(!al.nombre) continue;
+      try{
+        var ref=await db.collection('alumnos').add(Object.assign({createdAt:Date.now()},al));
+        ok++;
+      }catch(e){ errores++; }
+    }
+    toast('Alumnos restaurados: '+ok);
+  }
+  // Restaurar prácticas
+  if(data.practicas){
+    var fechas=Object.keys(data.practicas); var pracOk=0;
+    for(var f=0;f<fechas.length;f++){
+      var fecha=fechas[f]; var pracs=data.practicas[fecha];
+      if(!pracs||!pracs.length) continue;
+      try{
+        await db.collection('fechas_usadas').doc(fecha).set({fecha:fecha});
+        for(var p=0;p<pracs.length;p++){
+          await db.collection('practicas_'+fecha).add(pracs[p]);
+          pracOk++;
+        }
+      }catch(e){ errores++; }
+    }
+    toast('Prácticas restauradas: '+pracOk);
+  }
+  // Recargar datos
+  sync('online');
+  setTimeout(function(){ initData(); toast('✅ Backup restaurado correctamente'+(errores?' ('+errores+' errores)':'')); },1000);
+}
+
 // ── Exponer al scope global las funciones llamadas desde HTML inline ──
+window.importarBackup     = importarBackup;
 window.selRole            = selRole;
 window.selSb              = selSb;
 window.irTab              = irTab;
