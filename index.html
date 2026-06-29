@@ -2117,9 +2117,7 @@ function xlsxAJSON(wb){
 }
 
 async function restaurarDesdeJSON(data){
-  if(!confirm('⚠️ ATENCIÓN: Esto sobrescribirá los datos actuales.
-
-¿Estás seguro de que quieres restaurar este backup?')) return;
+  if(!confirm('⚠️ ATENCIÓN: Esto sobrescribirá los datos actuales.\n\n¿Estás seguro de que quieres restaurar este backup?')) return;
   await waitAuth(); sync('syncing');
   var errores=0, ok=0;
   // Restaurar alumnos
