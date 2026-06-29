@@ -432,11 +432,16 @@ html,body{height:100%;font-family:var(--sans);font-size:14px;color:var(--text);b
           <div class="card" style="padding:13px">
             <div class="sec-notice" id="od-status" style="margin-bottom:10px">⚪ OneDrive no conectado</div>
             <div class="fg"><label>Azure Client ID</label><input type="text" id="azure-client-id" placeholder="d720a8b8-7604-4bf6-8317-d99610f0bb79" value="d720a8b8-7604-4bf6-8317-d99610f0bb79" style="font-family:var(--mono);font-size:11px"></div>
-            <div style="display:flex;gap:8px;margin-bottom:8px">
-              <button class="btn-prim" style="flex:1" id="btn-conectar-od" onclick="conectarOD()">Conectar OneDrive</button>
+            <div class="fg" style="margin-bottom:8px">
+              <label>Carpeta destino en OneDrive</label>
+              <input type="text" id="od-folder" placeholder="DIESEL/BACKUP" value="DIESEL/DIESEL BACKUP" style="font-family:var(--mono);font-size:12px">
             </div>
-            <button class="btn-prim" style="width:100%;background:var(--green2)" onclick="hacerBackupManual()">💾 Backup manual ahora</button>
-            <p style="font-size:10px;color:var(--text3);margin-top:8px;text-align:center">Backup automático cada 2 horas · Se guarda en OneDrive/DIESEL/DIESEL BACKUP/</p>
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+              <button class="btn-prim" style="flex:1" id="btn-conectar-od" onclick="conectarOD()">🔗 Conectar OneDrive</button>
+              <button class="btn-sec" style="flex:0 0 auto;padding:10px 14px" onclick="desconectarOD()">✕</button>
+            </div>
+            <button class="btn-prim" style="width:100%;background:var(--green2);margin-bottom:8px" onclick="hacerBackupManual()">💾 Backup manual ahora</button>
+            <p style="font-size:10px;color:var(--text3);text-align:center">Backup automático cada 2 horas · Pulsa ✕ para cambiar de cuenta</p>
           </div>
         </div>
         <div class="cfg-sec">
@@ -1852,7 +1857,9 @@ async function subirBackupOD(json, filename){
     if(!ok) return false;
   }
   var year = new Date().getFullYear();
-  var path = 'DIESEL/DIESEL%20BACKUP/'+year+'/'+encodeURIComponent(filename);
+  var folderEl = document.getElementById('od-folder');
+  var baseFolder = (folderEl ? folderEl.value.trim() : 'DIESEL/DIESEL BACKUP') || 'DIESEL/DIESEL BACKUP';
+  var path = baseFolder.replace(/ /g,'%20')+'/'+year+'/'+encodeURIComponent(filename);
   try{
     var resp = await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/'+path+':/content?@microsoft.graph.conflictBehavior=replace',{
       method:'PUT',
@@ -1999,10 +2006,30 @@ function iniciarBackupAutomatico(){
 window.conectarOD = async function(){
   var btn = document.getElementById('btn-conectar-od');
   if(btn){ btn.textContent='Conectando...'; btn.disabled=true; }
-  var ok = await initOD(true); // true = permitir popup
+  // Limpiar sesión anterior para forzar login con cuenta del cliente
+  OD_TOKEN = null;
+  _msalApp = null;
+  // Borrar cache MSAL del localStorage
+  Object.keys(localStorage).forEach(function(k){
+    if(k.indexOf('msal.')=== 0 || k.indexOf('login.')=== 0) localStorage.removeItem(k);
+  });
+  var ok = await initOD(true);
   if(btn){ btn.textContent='Conectar OneDrive'; btn.disabled=false; }
-  if(ok){ toast('✅ OneDrive conectado'); }
-  else{ toast('❌ Error — verifica que no se bloqueó el popup'); }
+  if(ok){
+    var conf = getODConf();
+    toast('✅ OneDrive conectado · '+(conf.cuenta||''));
+    actualizarEstadoOD(true, conf.cuenta||'');
+  }else{ toast('❌ Error — verifica que no se bloqueó el popup'); }
+};
+
+window.desconectarOD = function(){
+  OD_TOKEN = null; _msalApp = null;
+  Object.keys(localStorage).forEach(function(k){
+    if(k.indexOf('msal.')=== 0 || k.indexOf('login.')=== 0) localStorage.removeItem(k);
+  });
+  localStorage.removeItem(OD_KEY);
+  actualizarEstadoOD(false);
+  toast('OneDrive desconectado');
 };
 window.hacerBackupManual = async function(){
   toast('⏳ Generando backup Excel...');
